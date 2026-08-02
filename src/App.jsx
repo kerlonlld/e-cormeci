@@ -19,15 +19,33 @@ const produtos = [
     nome: 'Amaciante 2L',
     preco: 7.5,
     img: 'https://shoppr.com.br/cdn/shop/products/7896098902400_amaciante_ype_01_1024x1024.jpg?v=1448634028',
+  },
+  {
+   id : 4,
+   nome : 'sabão em barra 1kg',
+   preco : 4.00,
+   img : ' https://cdn.awsli.com.br/2500x2500/1027/1027618/produto/55867977/51206cb51c.jpg'
   }
 ]
 
 export default function App() {
+
+
   const [carrinho, setCarrinho] = useState([])
 
-  const adicionarProduto = (produto) => {
-    setCarrinho((itens) => [...itens, produto])
-  }
+  const adicionarProduto = (produtoAdicionado) => {
+    setCarrinho((itensAtuais) =>{
+    const produtoexistente = itensAtuais.find((item) => item.id === produtoAdicionado.id)
+    if (produtoexistente) {
+      return itensAtuais.map((item) =>
+        item.id === produtoAdicionado.id ? { ...item, quantidade: item.quantidade + 1 } : item
+      );
+    }
+    return 
+
+[...itensAtuais, { ...produtoAdicionado, quantidade: 1 }];
+   });
+  };
 
   const limparCarrinho = () => {
     setCarrinho([])
@@ -37,7 +55,7 @@ export default function App() {
     <div className="loja">
       <header className="cabecalho">
         <h1 className="titulo">Minha Loja Virtual</h1>
-        <span className="badge-carrinho">Itens no Carrinho: {carrinho.length}</span>
+        <span className="badge-carrinho">Itens no Carrinho: {carrinho?.length}</span>
       </header>
 
       <main className="conteudo-principal">
