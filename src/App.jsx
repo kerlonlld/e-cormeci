@@ -29,33 +29,46 @@ const produtos = [
 ]
 
 export default function App() {
-
-
   const [carrinho, setCarrinho] = useState([])
+  const totalItens = carrinho?.length ?? 0
 
   const adicionarProduto = (produtoAdicionado) => {
-    setCarrinho((itensAtuais) =>{
-    const produtoexistente = itensAtuais.find((item) => item.id === produtoAdicionado.id)
-    if (produtoexistente) {
-      return itensAtuais.map((item) =>
-        item.id === produtoAdicionado.id ? { ...item, quantidade: item.quantidade + 1 } : item
-      );
-    }
-    return 
+    setCarrinho((itensAtuais) => {
+      const produtoExistente = itensAtuais.find((item) => item.id === produtoAdicionado.id)
 
-[...itensAtuais, { ...produtoAdicionado, quantidade: 1 }];
-   });
-  };
+      if (produtoExistente) {
+        return itensAtuais.map((item) =>
+          item.id === produtoAdicionado.id
+            ? { ...item, quantidade: item.quantidade + 1 }
+            : item
+        )
+      }
+
+      return [...itensAtuais, { ...produtoAdicionado, quantidade: 1 }]
+    })
+  }
 
   const limparCarrinho = () => {
     setCarrinho([])
+  }
+
+  const totalCarrinho = carrinho.reduce((soma, item) => soma + item.preco * item.quantidade, 0)
+
+  const finalizarCompra = () => {
+    if (totalItens === 0) {
+      alert('O carrinho está vazio. Adicione produtos antes de finalizar a compra.')
+      return
+    }
+
+    alert(`Compra finalizada! Total: R$ ${totalCarrinho.toFixed(2)}`)
+    limparCarrinho()
   }
 
   return (
     <div className="loja">
       <header className="cabecalho">
         <h1 className="titulo">Minha Loja Virtual</h1>
-        <span className="badge-carrinho">Itens no Carrinho: {carrinho?.length}</span>
+        <span className="badge-carrinho">Itens no Carrinho: {totalItens}</span>
       </header>
 
       <main className="conteudo-principal">
@@ -81,17 +94,28 @@ export default function App() {
         <aside className="sidebar-carrinho">
           <h2 className="secao-titulo">Seu Carrinho</h2>
 
-          {carrinho.length === 0 ? (
+          {totalItens === 0 ? (
             <p className="carrinho-vazio">O carrinho está vazio. Comece a construir sua compra!</p>
           ) : (
             <div className="carrinho-lista">
               {carrinho.map((item, index) => (
                 <div key={index} className="carrinho-item">
-                  <span className="carrinho-item-nome">{item.nome}</span>
-                  <span className="carrinho-item-preco">R$ {item.preco.toFixed(2)}</span>
+                  <span className="carrinho-item-nome">
+                    {item.nome} x{item.quantidade}
+                  </span>
+                  <span className="carrinho-item-preco">
+                    R$ {(item.preco * item.quantidade).toFixed(2)}
+                  </span>
                 </div>
               ))}
 
+              <div className="carrinho-item">
+                <span className="carrinho-item-nome">Total</span>
+                <span className="carrinho-item-precos">R$ {totalCarrinho.toFixed(2)}</span>
+              </div>
+                <button onClick={finalizarCompra} className="botao botao-finalizar">
+                  finalizar Compra 
+                </button>
               <button onClick={limparCarrinho} className="botao botao-limpar">
                 Esvaziar Carrinho
               </button>

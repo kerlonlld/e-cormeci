@@ -4,16 +4,6 @@ body {
   background-color: #c5a39b;
 }
 
-#root {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  text-align: left;
-  border: none;
-  min-height: 100vh;
-  display: block;
-}
-
 * {
   box-sizing: border-box;
 }
@@ -158,8 +148,15 @@ body {
 }
 
 .carrinho-item-preco {
-  color: #111827;
+  color: #11fd00;
   font-weight: 600;
+}
+.carrinho-item-precos {
+  color:#dc2626;
+  font-weight: 600;
+}
+.botao.botao-finalizar {
+  background-color: #10b981;
 }
 
 @media (max-width: 768px) {
