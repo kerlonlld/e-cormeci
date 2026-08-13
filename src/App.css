@@ -38,20 +38,49 @@ body {
 }
 
 .conteudo-principal {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
+ display: flex;
+ gap:20px;
+ align-items: flex-start;
+ width: 100%;
 }
 
-.secao-produtos,
+.secao-produtos {
+  flex: 1;
+  transition: all 0.3s ease-in-out;
+}
+
 .sidebar-carrinho {
-  background-color: #fff;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+ 
+  
+  flex-shrink: 0;
+  animation: surgir 0.3s ease-in-out;
+  position: fixed;
+  z-index: 1000;
+  /* Fundo branco com 90% de opacidade (leve transparência) */
+  background-color: rgba(255, 255, 255, 0.92); 
+  
+  /* Efeito de desfoque elegante no fundo */
+  backdrop-filter: blur(8px); 
+  
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.2);
+  
+  width: 300px;
+  user-select: none; /* Evita selecionar texto ao arrastar */
+}
+.carrinho-cabecalho-arrastavel {
+  padding: 8px;
+  margin-bottom: 12px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+  cursor: grab;
+}
+
+.carrinho-cabecalho-arrastavel:active {
+  cursor: grabbing;
 }
 
 .secao-titulo {
@@ -62,8 +91,19 @@ body {
 
 .grade-produtos {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 16px;
+}
+
+@keyframes surgir {
+  from{
+    opacity:0;
+    transform: translateX(20px)
+  }
+  to{
+    opacity:1;
+    transform:translateX(0)
+  }
 }
 
 .card-produto {
@@ -122,11 +162,7 @@ body {
   background-color: #dc2626;
 }
 
-.carrinho-vazio {
-  margin: 0;
-  color: #6b7280;
-  font-size: 0.95rem;
-}
+
 
 .carrinho-lista {
   display: flex;
@@ -157,6 +193,15 @@ body {
 }
 .botao.botao-finalizar {
   background-color: #10b981;
+}
+
+.campo-pesquisa {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
 }
 
 @media (max-width: 768px) {
