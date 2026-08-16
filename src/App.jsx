@@ -47,31 +47,46 @@ const COMPRAS_INICIAIS = [
     id: 1,
     valor: 48.9,
     data: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    itens: ['Detergente x1', 'Sabão em pó x1'],
+    itens: [
+      { nome: 'Detergente', quantidade: 1, img: PRODUTOS[0].img },
+      { nome: 'Sabão em pó 800g', quantidade: 1, img: PRODUTOS[1].img },
+    ],
   },
   {
     id: 2,
     valor: 72.5,
     data: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    itens: ['Amaciante x2', 'Desinfetante x1'],
+    itens: [
+      { nome: 'Amaciante 2L', quantidade: 2, img: PRODUTOS[2].img },
+      { nome: 'Desinfetante 500ml', quantidade: 1, img: PRODUTOS[4].img },
+    ],
   },
   {
     id: 3,
     valor: 134.0,
     data: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-    itens: ['Limpador Multiuso x2', 'Sabão em barra x3'],
+    itens: [
+      { nome: 'Limpador Multiuso 1L', quantidade: 2, img: PRODUTOS[5].img },
+      { nome: 'Sabão em barra 1kg', quantidade: 3, img: PRODUTOS[3].img },
+    ],
   },
   {
     id: 4,
     valor: 89.0,
     data: new Date(Date.now() - 22 * 24 * 60 * 60 * 1000).toISOString(),
-    itens: ['Detergente x2', 'Amaciante x1'],
+    itens: [
+      { nome: 'Detergente', quantidade: 2, img: PRODUTOS[0].img },
+      { nome: 'Amaciante 2L', quantidade: 1, img: PRODUTOS[2].img },
+    ],
   },
   {
     id: 5,
     valor: 210.5,
     data: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(),
-    itens: ['Sabão em pó x3', 'Desinfetante x2'],
+    itens: [
+      { nome: 'Sabão em pó 800g', quantidade: 3, img: PRODUTOS[1].img },
+      { nome: 'Desinfetante 500ml', quantidade: 2, img: PRODUTOS[4].img },
+    ],
   },
 ]
 
@@ -95,6 +110,32 @@ function calcularDistanciaEmKm(lat1, lon1, lat2, lon2) {
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   return 6371 * c
+}
+
+function normalizarItensCompra(itens) {
+  if (!Array.isArray(itens)) return []
+
+  return itens.map((item) => {
+    if (typeof item === 'string') {
+      const [nome, quantidadeTexto] = item.split(' x')
+      const quantidade = Number(quantidadeTexto || 1)
+      const produto = PRODUTOS.find(
+        (produtoAtual) => produtoAtual.nome.toLowerCase() === nome.toLowerCase()
+      )
+
+      return {
+        nome,
+        quantidade,
+        img: produto?.img || '',
+      }
+    }
+
+    return {
+      nome: item.nome || 'Produto',
+      quantidade: Number(item.quantidade || 1),
+      img: item.img || '',
+    }
+  })
 }
 
 // 2. Custom Hook para a funcionalidade de arrastar
@@ -162,13 +203,14 @@ function CardProduto({ produto, onAdicionar }) {
   return (
     <div className="card-produto">
       <img src={produto.img} alt={produto.nome} className="produto-imagem" />
-      <div>
+
+      <div className="produto-info">
         <h3 className="produto-nome">{produto.nome}</h3>
         <p className="produto-preco">R$ {produto.preco.toFixed(2)}</p>
+        <button onClick={() => onAdicionar(produto)} className="botao">
+          Adicionar ao Carrinho
+        </button>
       </div>
-      <button onClick={() => onAdicionar(produto)} className="botao">
-        Adicionar ao Carrinho
-      </button>
     </div>
   )
 }
@@ -430,7 +472,11 @@ export default function App() {
       id: Date.now(),
       valor: valorFinalCompra,
       data: new Date().toISOString(),
-      itens: carrinho.map((item) => `${item.nome} x${item.quantidade}`),
+      itens: carrinho.map((item) => ({
+        nome: item.nome,
+        quantidade: item.quantidade,
+        img: item.img,
+      })),
     }
 
     setHistoricoCompras((comprasAnteriores) => [compraAtual, ...comprasAnteriores])
@@ -525,22 +571,36 @@ export default function App() {
           <div className="lista-compras">
             {historicoCompras.slice(0, 5).map((compra) => {
               const dataCompra = new Date(compra.data)
+              const itensCompra = normalizarItensCompra(compra.itens)
 
               return (
                 <div key={compra.id} className="item-compra">
-                  <div className="item-compra-detalhes">
-                    <span className="item-compra-data">
-                      {dataCompra.toLocaleDateString('pt-BR')} às {dataCompra.toLocaleTimeString('pt-BR', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </span>
-                    <span className="item-compra-itens">
-                      {(compra.itens && compra.itens.length > 0
-                        ? compra.itens.join(', ')
-                        : 'Compra realizada')
-                      }
-                    </span>
+                  <div className="item-compra-conteudo">
+                    <div className="miniaturas-compra">
+                      {itensCompra.slice(0, 3).map((item, index) => (
+                        <img
+                          key={`${compra.id}-${item.nome}-${index}`}
+                          src={item.img}
+                          alt={item.nome}
+                          className="miniatura-compra"
+                        />
+                      ))}
+                    </div>
+
+                    <div className="item-compra-detalhes">
+                      <span className="item-compra-data">
+                        {dataCompra.toLocaleDateString('pt-BR')} às {' '}
+                        {dataCompra.toLocaleTimeString('pt-BR', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                      <span className="item-compra-itens">
+                        {itensCompra.length > 0
+                          ? itensCompra.map((item) => `${item.nome} x${item.quantidade}`).join(', ')
+                          : 'Compra realizada'}
+                      </span>
+                    </div>
                   </div>
                   <strong>R$ {compra.valor.toFixed(2)}</strong>
                 </div>

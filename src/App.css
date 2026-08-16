@@ -117,6 +117,30 @@ body {
   gap: 12px;
 }
 
+.item-compra-conteudo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.miniaturas-compra {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.miniatura-compra {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+}
+
 .item-compra-detalhes {
   display: flex;
   flex-direction: column;
@@ -333,6 +357,12 @@ body {
   margin-bottom: 12px;
 }
 
+.produto-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .produto-nome {
   margin: 0 0 8px;
   color: #374151;
@@ -341,7 +371,7 @@ body {
 }
 
 .produto-preco {
-  margin: 0;
+  margin: 0 0 12px;
   color: #2563eb;
   font-weight: 700;
 }
