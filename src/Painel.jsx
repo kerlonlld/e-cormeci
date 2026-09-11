@@ -1,6 +1,5 @@
-import { useState, useRef } from 'react'
-import './App.css'
 import { useState } from 'react'
+import './App.css'
 
 export default function App() {
   // Estado para saber qual aba está selecionada

@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import { LocalizacaoMaps } from './LocalizacaoMaps'
+
 
 // 1. Dados dos produtos (Fora do componente para evitar recriação na render)
 const PRODUTOS = [
@@ -133,7 +134,7 @@ function normalizarItensCompra(itens) {
     return {
       nome: item.nome || 'Produto',
       quantidade: Number(item.quantidade || 1),
-      img: item.img || '',
+      img: item.img || PRODUTOS.find((produto) => produto.nome === item.nome)?.img || '',
     }
   })
 }
@@ -342,6 +343,21 @@ function SidebarCarrinho({
 
 // 4. Componente Principal
 export default function App() {
+  const [produtos, setProdutos] = useState([])
+  const [carregandoProdutos, setCarregandoProdutos] = useState(true)
+  const [erroProdutos, setErroProdutos] = useState('')
+  const [perfil, setPerfil] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('perfil-e-cormeci')) || {
+        nome: 'Usuário',
+        email: 'usuario@email.com',
+        telefone: '',
+        foto: '',
+      }
+    } catch {
+      return { nome: 'Usuário', email: 'usuario@email.com', telefone: '', foto: '' }
+    }
+  })
   const [carrinho, setCarrinho] = useState([])
   const [pesquisa, setPesquisa] = useState('')
   const [carrinhoAberto, setCarrinhoAberto] = useState(false)
@@ -349,8 +365,78 @@ export default function App() {
   const [abaAtiva, setAbaAtiva] = useState('home')
   const [historicoCompras, setHistoricoCompras] = useState(COMPRAS_INICIAIS)
   const [localizacaoUsuario, setLocalizacaoUsuario] = useState(null)
+  const [editandoEndereco, setEditandoEndereco] = useState(false)
 
   const { posicao, iniciarArrasto, duranteArrasto, pararArrasto } = useDraggable()
+
+  const atualizarPerfil = (campo, valor) => {
+    setPerfil((perfilAtual) => {
+      const perfilAtualizado = { ...perfilAtual, [campo]: valor }
+      localStorage.setItem('perfil-e-cormeci', JSON.stringify(perfilAtualizado))
+      return perfilAtualizado
+    })
+  }
+
+  const selecionarFoto = (evento) => {
+    const arquivo = evento.target.files?.[0]
+    if (!arquivo) return
+
+    const leitor = new FileReader()
+    leitor.onload = () => atualizarPerfil('foto', leitor.result)
+    leitor.readAsDataURL(arquivo)
+  }
+
+  useEffect(() => {
+    const carregarProdutos = async () => {
+      try {
+        const resposta = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/produtos`
+        )
+
+        if (!resposta.ok) {
+          throw new Error('Não foi possível carregar os produtos.')
+        }
+
+        const produtosDaApi = await resposta.json()
+        const produtosNormalizados = produtosDaApi.map((produto) => {
+          const produtoLocal = PRODUTOS.find((item) => item.nome === produto.nome)
+
+          return {
+            ...produto,
+            preco: Number(produto.preco),
+            img: produto.img || produtoLocal?.img || '',
+          }
+        })
+
+        setProdutos(produtosNormalizados)
+      } catch (erro) {
+        console.error(erro)
+        setErroProdutos('Não foi possível carregar os produtos.')
+      } finally {
+        setCarregandoProdutos(false)
+      }
+    }
+
+    carregarProdutos()
+  }, [])
+
+  useEffect(() => {
+    const carregarHistorico = async () => {
+      try {
+        const resposta = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/pedidos`
+        )
+
+        if (!resposta.ok) throw new Error('Não foi possível carregar o histórico.')
+
+        setHistoricoCompras(await resposta.json())
+      } catch (erro) {
+        console.error(erro)
+      }
+    }
+
+    carregarHistorico()
+  }, [])
 
   const totalItens = carrinho.length
   const totalCarrinho = carrinho.reduce((soma, item) => soma + item.preco * item.quantidade, 0)
@@ -385,7 +471,7 @@ export default function App() {
     })
     .reduce((soma, compra) => soma + compra.valor, 0)
 
-  const produtosFiltrados = PRODUTOS.filter((produto) =>
+  const produtosFiltrados = produtos.filter((produto) =>
     produto.nome.toLowerCase().includes(pesquisa.toLowerCase())
   )
 
@@ -449,7 +535,7 @@ export default function App() {
     setCarrinho((itensAtuais) => itensAtuais.filter((item) => item.id !== id))
   }
 
-  const finalizarCompra = () => {
+  const finalizarCompra = async () => {
     if (totalItens === 0) {
       alert('O carrinho está vazio. Adicione produtos antes de finalizar a compra.')
       return
@@ -468,18 +554,35 @@ export default function App() {
 
     const valorFinalCompra = totalComFrete
 
-    const compraAtual = {
-      id: Date.now(),
-      valor: valorFinalCompra,
-      data: new Date().toISOString(),
-      itens: carrinho.map((item) => ({
-        nome: item.nome,
-        quantidade: item.quantidade,
-        img: item.img,
-      })),
+    try {
+      const resposta = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/pedidos`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            valorTotal: valorFinalCompra,
+            itens: carrinho.map((item) => ({
+              produtoId: item.id,
+              nome: item.nome,
+              quantidade: item.quantidade,
+              preco: item.preco,
+              img: item.img,
+            })),
+          }),
+        }
+      )
+
+      if (!resposta.ok) throw new Error('Não foi possível salvar a compra.')
+
+      const compraAtual = await resposta.json()
+      setHistoricoCompras((comprasAnteriores) => [compraAtual, ...comprasAnteriores])
+    } catch (erro) {
+      console.error(erro)
+      alert('Não foi possível salvar a compra no banco de dados.')
+      return
     }
 
-    setHistoricoCompras((comprasAnteriores) => [compraAtual, ...comprasAnteriores])
     alert(`Compra finalizada! Total: R$ ${valorFinalCompra.toFixed(2)}`)
     limparCarrinho()
   }
@@ -497,6 +600,19 @@ export default function App() {
       {abaAtiva === 'home' && (
         <main className="conteudo-principal">
           <section className="secao-produtos">
+            {!localizacaoConfirmada && (
+              <section className="cartao-endereco-home">
+                <div>
+                  <span className="rotulo-cartao">Entrega</span>
+                  <strong>Confirme seu endereço</strong>
+                  <p>
+                    {localizacaoUsuario?.nomeLocal || 'Defina onde devemos entregar sua compra.'}
+                  </p>
+                </div>
+                <span className="status-endereco">Pendente</span>
+              </section>
+            )}
+
             <h2 className="secao-titulo">Nossos Produtos</h2>
 
             <input
@@ -508,13 +624,20 @@ export default function App() {
             />
 
             <div className="grade-produtos">
-              {produtosFiltrados.map((produto) => (
-                <CardProduto
-                  key={produto.id}
-                  produto={produto}
-                  onAdicionar={adicionarProduto}
-                />
-              ))}
+              {carregandoProdutos && <p>Carregando produtos...</p>}
+              {!carregandoProdutos && erroProdutos && <p>{erroProdutos}</p>}
+              {!carregandoProdutos && !erroProdutos && produtosFiltrados.length === 0 && (
+                <p>Nenhum produto encontrado.</p>
+              )}
+              {!carregandoProdutos &&
+                !erroProdutos &&
+                produtosFiltrados.map((produto) => (
+                  <CardProduto
+                    key={produto.id}
+                    produto={produto}
+                    onAdicionar={adicionarProduto}
+                  />
+                ))}
             </div>
           </section>
 
@@ -611,12 +734,54 @@ export default function App() {
       )}
 
       {abaAtiva === 'perfil' && (
-        <main className="pagina-aba">
-          <h2>Meu Perfil</h2>
-          <p>Nome: Usuário</p>
-          <p>Email: usuario@email.com</p>
+        <main className="pagina-aba perfil-pagina">
+          <div className="perfil-cabecalho">
+            <div className="avatar-perfil">
+              {perfil.foto ? <img src={perfil.foto} alt="Sua foto de perfil" /> : <span>👤</span>}
+              <label className="botao-foto" title="Escolher foto de perfil">
+                📷
+                <input type="file" accept="image/*" onChange={selecionarFoto} />
+              </label>
+            </div>
+            <div className="perfil-identidade">
+              <span className="rotulo-cartao">Minha conta</span>
+              <h2>{perfil.nome || 'Seu perfil'}</h2>
+              <p>{localizacaoConfirmada ? 'Endereço de entrega confirmado' : 'Complete seus dados'}</p>
+            </div>
+          </div>
 
-          <LocalizacaoMaps onLocalizacaoChange={setLocalizacaoUsuario} />
+          <section className="perfil-cartao">
+            <h3>Dados pessoais</h3>
+            <label>
+              Nome
+              <input value={perfil.nome} onChange={(e) => atualizarPerfil('nome', e.target.value)} />
+            </label>
+            <label>
+              E-mail
+              <input type="email" value={perfil.email} onChange={(e) => atualizarPerfil('email', e.target.value)} />
+            </label>
+            <label>
+              Telefone
+              <input value={perfil.telefone} onChange={(e) => atualizarPerfil('telefone', e.target.value)} placeholder="(00) 00000-0000" />
+            </label>
+          </section>
+
+          <section className="perfil-cartao resumo-perfil-endereco">
+            <div>
+              <h3>Endereço de entrega</h3>
+              <p>{localizacaoUsuario?.nomeLocal || 'Nenhum endereço confirmado ainda.'}</p>
+            </div>
+            <button type="button" className="botao-secundario" onClick={() => setEditandoEndereco(true)}>
+              Editar endereço
+            </button>
+          </section>
+
+          <LocalizacaoMaps
+            onLocalizacaoChange={setLocalizacaoUsuario}
+            editar={editandoEndereco}
+            onEdicaoConcluida={() => setEditandoEndereco(false)}
+            onEditar={() => setEditandoEndereco(true)}
+          />
         </main>
       )}
 
