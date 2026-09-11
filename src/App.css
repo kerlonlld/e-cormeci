@@ -62,6 +62,195 @@ body {
   text-align: center;
 }
 
+.perfil-pagina {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.perfil-cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 24px;
+  margin-bottom: 16px;
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #0f766e);
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.2);
+}
+
+.avatar-perfil {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  flex: 0 0 92px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 4px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  background: #dbeafe;
+  color: #2563eb;
+  font-size: 2.5rem;
+}
+
+.avatar-perfil img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.botao-foto {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #f59e0b;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.botao-foto input {
+  display: none;
+}
+
+.perfil-identidade {
+  min-width: 0;
+}
+
+.perfil-identidade h2 {
+  margin: 4px 0;
+  font-size: 1.7rem;
+}
+
+.perfil-identidade p,
+.perfil-cartao p {
+  margin: 0;
+  color: #dbeafe;
+}
+
+.rotulo-cartao {
+  display: block;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.perfil-cabecalho .rotulo-cartao {
+  color: #bfdbfe;
+}
+
+.perfil-cartao {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+.perfil-cartao h3 {
+  margin: 0 0 2px;
+  color: #1e293b;
+}
+
+.perfil-cartao label {
+  display: grid;
+  gap: 6px;
+  color: #475569;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.perfil-cartao input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+.perfil-cartao input:focus {
+  outline: 2px solid #93c5fd;
+  border-color: #2563eb;
+}
+
+.resumo-perfil-endereco {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.resumo-perfil-endereco p {
+  margin-top: 6px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.botao-secundario {
+  padding: 10px 14px;
+  border: 1px solid #2563eb;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cartao-endereco-home {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  min-width: 230px;
+  padding: 18px;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  background: #eff6ff;
+}
+
+.cartao-endereco-home strong {
+  display: block;
+  margin-top: 5px;
+  color: #1e3a8a;
+}
+
+.cartao-endereco-home p {
+  max-width: 260px;
+  margin: 7px 0 0;
+  color: #475569;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.status-endereco {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-endereco.confirmado {
+  background: #dcfce7;
+  color: #166534;
+}
+
 .cards-compras {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -230,10 +419,37 @@ body {
   margin-top: 16px;
 }
 
+.endereco-recolhido {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.endereco-recolhido strong {
+  display: block;
+  margin-top: 5px;
+  color: #1f2937;
+  line-height: 1.4;
+}
+
 .titulo-localizacao {
   margin: 0 0 12px 0;
   font-size: 1rem;
   color: #1f2937;
+}
+
+.rotulo-endereco {
+  display: block;
+  margin-bottom: 6px;
+  color: #374151;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.linha-cep {
+  display: flex;
+  gap: 8px;
 }
 
 .botao-gps {
@@ -316,6 +532,29 @@ body {
 
 .botao-confirmar:hover {
   background-color: #fbbf24;
+}
+
+.acoes-endereco {
+  display: flex;
+  gap: 8px;
+}
+
+.acoes-endereco button {
+  flex: 1;
+}
+
+.botao-verificar {
+  padding: 10px;
+  border: 1px solid #2563eb;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.botao-verificar:hover {
+  background: #dbeafe;
 }
 
 .secao-titulo {
@@ -589,9 +828,56 @@ body {
   .conteudo-principal {
     flex-direction: column;
   }
+
+  .cartao-endereco-home,
+  .container-localizacao {
+    width: 100%;
+  }
 }
 
 @media (max-width: 640px) {
+  .pagina-aba {
+    padding: 16px;
+  }
+
+  .perfil-cabecalho {
+    padding: 18px;
+  }
+
+  .avatar-perfil {
+    width: 72px;
+    height: 72px;
+    flex-basis: 72px;
+    font-size: 2rem;
+  }
+
+  .perfil-identidade h2 {
+    font-size: 1.35rem;
+  }
+
+  .resumo-perfil-endereco {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .endereco-recolhido {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .linha-cep,
+  .form-endereco {
+    flex-direction: column;
+  }
+
+  .acoes-endereco {
+    flex-direction: column;
+  }
+
+  .botao-busca {
+    width: 100%;
+  }
+
   .grade-produtos {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;

@@ -1,5 +1,16 @@
 # React + Vite
 
+## Banco de dados
+
+O schema PostgreSQL da loja está em [`database/schema.sql`](database/schema.sql). Com o PostgreSQL instalado, crie um banco e execute:
+
+```bash
+createdb e_cormeci
+psql e_cormeci -f database/schema.sql
+```
+
+O frontend atual ainda utiliza dados locais de demonstração. A conexão com o banco deve ser feita por uma API backend; não coloque credenciais ou a senha do banco no código Vite executado no navegador.
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:
