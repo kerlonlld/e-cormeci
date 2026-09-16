@@ -1,0 +1,16 @@
+{
+  "name": "e-cormeci-root",
+  "private": true,
+  "scripts": {
+    "dev": "cd ./e-cormeci && npm run dev -- --host",
+    "build": "cd ./e-cormeci && npm run build",
+    "preview": "cd ./e-cormeci && npm run preview -- --host",
+    "server": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "pg": "^8.23.0"
+  }
+}

@@ -1,0 +1,8 @@
+node_modules/
+e-cormeci/node_modules/
+e-cormeci/dist/
+.env
+.env.*
+!.env.example
+npm-debug.log*
+*.log

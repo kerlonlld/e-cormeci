@@ -1,0 +1,9 @@
+.env
+.env.*
+node_modules
+e-cormeci/node_modules
+e-cormeci/dist
+.git
+.gitignore
+README.md
+e-cormeci/README.md

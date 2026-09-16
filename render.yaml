@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: e-cormeci
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/produtos
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: e-cormeci-db
+          property: connectionString
+      - key: NODE_ENV
+        value: production
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DELIVERY_EMAIL
+        sync: false
+      - key: DELIVERY_PASSWORD
+        sync: false
+      - key: PIX_KEY
+        value: 38998625393
+
+databases:
+  - name: e-cormeci-db
+    plan: free
