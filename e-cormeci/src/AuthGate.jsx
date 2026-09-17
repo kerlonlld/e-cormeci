@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { cloneElement, useEffect, useState } from 'react'
 import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
@@ -66,10 +66,7 @@ export function AuthGate({ children }) {
   if (usuario) {
     return (
       <>
-        {children}
-        <button type="button" className="botao-sair-conta" onClick={() => signOut(auth)}>
-          Sair da conta
-        </button>
+        {cloneElement(children, { usuario, onSair: () => signOut(auth) })}
       </>
     )
   }

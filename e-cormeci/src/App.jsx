@@ -204,13 +204,14 @@ function useDraggable(posicaoInicial = { x: 20, y: 100 }) {
 }
 
 // 3. Subcomponentes
-function Header({ totalItens, onAlternarCarrinho, onAdmin, onDelivery }) {
+function Header({ totalItens, onAlternarCarrinho, onAdmin, onDelivery, onSair }) {
   return (
     <header className="cabecalho">
       <h1 className="titulo">Minha Loja Virtual</h1>
       <div className="cabecalho-acoes">
         <button type="button" className="botao-acesso" onClick={onDelivery}>🚚 Entregas</button>
         <button type="button" className="botao-acesso" onClick={onAdmin}>⚙️ Admin</button>
+        <button type="button" className="botao-acesso" onClick={onSair}>Sair</button>
         <button
           type="button"
           className="badge-carrinho"
@@ -474,13 +475,14 @@ function PagamentoModal({ pedido, onFechar, onSelecionar, onPagamentoConfirmado 
 }
 
 // 4. Componente Principal
-export default function App() {
+export default function App({ usuario, onSair }) {
+  const chaveArmazenamento = (nome) => `${nome}-${usuario.uid}`
   const [produtos, setProdutos] = useState([])
   const [carregandoProdutos, setCarregandoProdutos] = useState(true)
   const [erroProdutos, setErroProdutos] = useState('')
   const [perfil, setPerfil] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('perfil-e-cormeci')) || {
+      return JSON.parse(localStorage.getItem(chaveArmazenamento('perfil-e-cormeci'))) || {
         nome: 'Usuário',
         email: 'usuario@email.com',
         telefone: '',
@@ -492,32 +494,32 @@ export default function App() {
   })
   const [carrinho, setCarrinho] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('carrinho-e-cormeci')) || []
+      return JSON.parse(localStorage.getItem(chaveArmazenamento('carrinho-e-cormeci'))) || []
     } catch {
       return []
     }
   })
   const [pesquisa, setPesquisa] = useState('')
   const [modoAcesso, setModoAcesso] = useState('cliente')
-  const [codigoEntregaAtual, setCodigoEntregaAtual] = useState(() => localStorage.getItem('codigo-entrega-e-cormeci') || '')
+  const [codigoEntregaAtual, setCodigoEntregaAtual] = useState(() => localStorage.getItem(chaveArmazenamento('codigo-entrega-e-cormeci')) || '')
   const [carrinhoAberto, setCarrinhoAberto] = useState(false)
   const [fechadoManualmente, setFechadoManualmente] = useState(false)
   const [abaAtiva, setAbaAtiva] = useState(() => {
-    const abaSalva = localStorage.getItem('aba-ativa-e-cormeci')
+    const abaSalva = localStorage.getItem(chaveArmazenamento('aba-ativa-e-cormeci'))
     return ['home', 'compras', 'perfil'].includes(abaSalva) ? abaSalva : 'home'
   })
   const [pagamentoAberto, setPagamentoAberto] = useState(null)
   const [historicoCompras, setHistoricoCompras] = useState(() => {
     try {
-      return normalizarHistoricoCompras(JSON.parse(localStorage.getItem('historico-e-cormeci'))) || COMPRAS_INICIAIS
+      return normalizarHistoricoCompras(JSON.parse(localStorage.getItem(chaveArmazenamento('historico-e-cormeci')))) || []
     } catch {
-      return COMPRAS_INICIAIS
+      return []
     }
   })
   const [localizacaoUsuario, setLocalizacaoUsuario] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('localizacao-e-cormeci'))
-        || JSON.parse(localStorage.getItem('localizacao-atual-e-cormeci'))
+      return JSON.parse(localStorage.getItem(chaveArmazenamento('localizacao-e-cormeci')))
+        || JSON.parse(localStorage.getItem(chaveArmazenamento('localizacao-atual-e-cormeci')))
         || null
     } catch {
       return null
@@ -526,33 +528,33 @@ export default function App() {
   const [editandoEndereco, setEditandoEndereco] = useState(false)
   const [dadosPessoaisConfirmados, setDadosPessoaisConfirmados] = useState(() => {
     try {
-      return Boolean(JSON.parse(localStorage.getItem('dados-pessoais-confirmados-e-cormeci')))
+      return Boolean(JSON.parse(localStorage.getItem(chaveArmazenamento('dados-pessoais-confirmados-e-cormeci'))))
     } catch {
       return false
     }
   })
   const [editandoDadosPessoais, setEditandoDadosPessoais] = useState(() => {
     try {
-      return !JSON.parse(localStorage.getItem('dados-pessoais-confirmados-e-cormeci'))
+      return !JSON.parse(localStorage.getItem(chaveArmazenamento('dados-pessoais-confirmados-e-cormeci')))
     } catch {
       return true
     }
   })
 
   useEffect(() => {
-    localStorage.setItem('localizacao-e-cormeci', JSON.stringify(localizacaoUsuario))
+    localStorage.setItem(chaveArmazenamento('localizacao-e-cormeci'), JSON.stringify(localizacaoUsuario))
   }, [localizacaoUsuario])
 
   useEffect(() => {
-    localStorage.setItem('dados-pessoais-confirmados-e-cormeci', JSON.stringify(dadosPessoaisConfirmados))
+    localStorage.setItem(chaveArmazenamento('dados-pessoais-confirmados-e-cormeci'), JSON.stringify(dadosPessoaisConfirmados))
   }, [dadosPessoaisConfirmados])
 
   useEffect(() => {
-    localStorage.setItem('aba-ativa-e-cormeci', abaAtiva)
+    localStorage.setItem(chaveArmazenamento('aba-ativa-e-cormeci'), abaAtiva)
   }, [abaAtiva])
 
   useEffect(() => {
-    localStorage.setItem('historico-e-cormeci', JSON.stringify(historicoCompras))
+    localStorage.setItem(chaveArmazenamento('historico-e-cormeci'), JSON.stringify(historicoCompras))
   }, [historicoCompras])
 
   useEffect(() => {
@@ -561,7 +563,7 @@ export default function App() {
     if (!ultimaCompra) {
       if (codigoEntregaAtual) {
         setCodigoEntregaAtual('')
-        localStorage.removeItem('codigo-entrega-e-cormeci')
+        localStorage.removeItem(chaveArmazenamento('codigo-entrega-e-cormeci'))
       }
       return
     }
@@ -569,14 +571,14 @@ export default function App() {
     if (ultimaCompra.status === 'entregue') {
       if (codigoEntregaAtual) {
         setCodigoEntregaAtual('')
-        localStorage.removeItem('codigo-entrega-e-cormeci')
+        localStorage.removeItem(chaveArmazenamento('codigo-entrega-e-cormeci'))
       }
       return
     }
 
     if (!codigoEntregaAtual && ultimaCompra.codigoEntrega) {
       setCodigoEntregaAtual(ultimaCompra.codigoEntrega)
-      localStorage.setItem('codigo-entrega-e-cormeci', ultimaCompra.codigoEntrega)
+      localStorage.setItem(chaveArmazenamento('codigo-entrega-e-cormeci'), ultimaCompra.codigoEntrega)
     }
   }, [historicoCompras, codigoEntregaAtual])
 
@@ -585,7 +587,7 @@ export default function App() {
   const atualizarPerfil = (campo, valor) => {
     setPerfil((perfilAtual) => {
       const perfilAtualizado = { ...perfilAtual, [campo]: valor }
-      localStorage.setItem('perfil-e-cormeci', JSON.stringify(perfilAtualizado))
+      localStorage.setItem(chaveArmazenamento('perfil-e-cormeci'), JSON.stringify(perfilAtualizado))
       return perfilAtualizado
     })
   }
@@ -600,7 +602,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    localStorage.setItem('carrinho-e-cormeci', JSON.stringify(carrinho))
+    localStorage.setItem(chaveArmazenamento('carrinho-e-cormeci'), JSON.stringify(carrinho))
   }, [carrinho])
 
   useEffect(() => {
@@ -640,16 +642,14 @@ export default function App() {
   useEffect(() => {
     const carregarHistorico = async () => {
       try {
-        const resposta = await fetch(
-          `${API}/api/pedidos`
-        )
+        const resposta = await fetch(`${API}/api/pedidos?clienteId=${encodeURIComponent(usuario.uid)}`)
 
         if (!resposta.ok) throw new Error('Não foi possível carregar o histórico.')
 
         const pedidos = await resposta.json()
         const historicoAtualizado = normalizarHistoricoCompras(pedidos)
         setHistoricoCompras(historicoAtualizado)
-        localStorage.setItem('historico-e-cormeci', JSON.stringify(historicoAtualizado))
+        localStorage.setItem(chaveArmazenamento('historico-e-cormeci'), JSON.stringify(historicoAtualizado))
       } catch (erro) {
         console.error(erro)
       }
@@ -807,6 +807,7 @@ export default function App() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            clienteId: usuario.uid,
             valorTotal: valorFinalCompra,
             metodoPagamento,
             endereco: localizacaoUsuario?.nomeLocal || 'Endereço não informado',
@@ -868,6 +869,7 @@ export default function App() {
         onAlternarCarrinho={alternarCarrinho}
         onAdmin={() => setModoAcesso('admin')}
         onDelivery={() => setModoAcesso('entregador')}
+        onSair={onSair}
       />
 
       {abaAtiva === 'home' && (

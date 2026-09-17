@@ -138,8 +138,10 @@ app.delete('/api/admin/produtos/:id', exigirSessao('admin'), async (req, res) =>
     }
 })
 
-app.get('/api/pedidos', async (_req, res) => {
+app.get('/api/pedidos', async (req, res) => {
     try {
+        const clienteId = String(req.query.clienteId || '').trim()
+        if (!clienteId) return res.json([])
         const resultado = await pool.query(`
             SELECT
                 pedidos.id,
@@ -168,9 +170,10 @@ app.get('/api/pedidos', async (_req, res) => {
             FROM pedidos
             LEFT JOIN itens_pedido ON itens_pedido.pedido_id = pedidos.id
             LEFT JOIN produtos ON produtos.id = itens_pedido.produto_id
+            WHERE pedidos.cliente_id = $1
             GROUP BY pedidos.id
             ORDER BY pedidos.criado_em DESC
-        `)
+        `, [clienteId])
 
         res.json(resultado.rows)
     } catch (error) {
@@ -180,10 +183,10 @@ app.get('/api/pedidos', async (_req, res) => {
 })
 
 app.post('/api/pedidos', async (req, res) => {
-    const { valorTotal, itens, endereco, metodoPagamento } = req.body
+    const { clienteId, valorTotal, itens, endereco, metodoPagamento } = req.body
     const metodosPagamento = ['cartao', 'pix', 'dinheiro']
 
-    if (!Number.isFinite(Number(valorTotal)) || !Array.isArray(itens) || itens.length === 0 || !metodosPagamento.includes(metodoPagamento)) {
+    if (!clienteId || !Number.isFinite(Number(valorTotal)) || !Array.isArray(itens) || itens.length === 0 || !metodosPagamento.includes(metodoPagamento)) {
         return res.status(400).json({ error: 'Pedido inválido' })
     }
 
@@ -195,12 +198,12 @@ app.post('/api/pedidos', async (req, res) => {
         const codigoEntrega = criarCodigoEntrega()
         const pedido = await cliente.query(
             `INSERT INTO pedidos
-                (valor_total, endereco_entrega, codigo_entrega, status, metodo_pagamento, status_pagamento, id_transacao, chave_pix, pagamento_expira_em)
-             VALUES ($1, $2, $3, 'aguardando_pagamento', $4, 'pendente', $5, $6, NOW() + INTERVAL '10 minutes')
+                     (cliente_id, valor_total, endereco_entrega, codigo_entrega, status, metodo_pagamento, status_pagamento, id_transacao, chave_pix, pagamento_expira_em)
+                 VALUES ($1, $2, $3, $4, 'aguardando_pagamento', $5, 'pendente', $6, $7, NOW() + INTERVAL '10 minutes')
              RETURNING id, valor_total AS valor, criado_em AS data, status, endereco_entrega AS endereco,
                        metodo_pagamento AS "metodoPagamento", status_pagamento AS "statusPagamento",
                        id_transacao AS "idTransacao", chave_pix AS "chavePix", pagamento_expira_em AS "pagamentoExpiraEm"`,
-            [Number(valorTotal), endereco?.trim() || 'Endereço não informado', codigoEntrega, metodoPagamento, criarIdTransacao(), process.env.PIX_KEY || '38998625393']
+            [clienteId, Number(valorTotal), endereco?.trim() || 'Endereço não informado', codigoEntrega, metodoPagamento, criarIdTransacao(), process.env.PIX_KEY || '38998625393']
         )
 
         for (const item of itens) {
@@ -388,6 +391,7 @@ async function iniciarServidor() {
     await pool.query(`
         ALTER TABLE produtos ADD COLUMN IF NOT EXISTS imagem TEXT;
         ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS endereco_entrega TEXT;
+        ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS cliente_id VARCHAR(128);
         ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS codigo_entrega VARCHAR(6);
         ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS entregador_id INT;
         ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS metodo_pagamento VARCHAR(20);

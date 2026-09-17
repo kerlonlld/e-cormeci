@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS enderecos (
 CREATE TABLE IF NOT EXISTS pedidos (
     id SERIAL PRIMARY KEY,
     usuario_id INT REFERENCES usuarios(id) ON DELETE SET NULL,
+    cliente_id VARCHAR(128),
     endereco_id INT REFERENCES enderecos(id) ON DELETE SET NULL,
     status VARCHAR(30) NOT NULL DEFAULT 'aguardando_pagamento',
     valor_total NUMERIC(10, 2) NOT NULL,
