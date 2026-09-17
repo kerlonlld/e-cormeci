@@ -97,6 +97,16 @@ body {
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   font-size: 1rem;
+  background: #fff;
+  color: #1e293b;
+  color-scheme: light;
+}
+
+.painel-login input::placeholder,
+.painel-admin input::placeholder,
+.confirmacao-entrega input::placeholder,
+.perfil-cartao input::placeholder {
+  color: #94a3b8;
 }
 
 .painel-topo {
@@ -439,6 +449,8 @@ body {
   border-radius: 8px;
   color: #1e293b;
   font-size: 0.95rem;
+  background: #fff;
+  color-scheme: light;
 }
 
 .perfil-cartao input:focus {
