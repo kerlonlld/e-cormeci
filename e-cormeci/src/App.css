@@ -219,6 +219,16 @@ body {
 .mensagem-sucesso { color: #15803d; margin: 0 0 12px; }
 .texto-vazio { color: #64748b; }
 
+.login-cliente { display: grid; place-items: center; }
+.login-cliente h1 { margin: 0; color: #0f172a; font-size: 2rem; }
+.login-cliente form { display: grid; gap: 14px; }
+.botao-google { padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #1e293b; font-weight: 700; cursor: pointer; }
+.botao-google:hover { background: #f8fafc; }
+.separador-login { display: flex; align-items: center; gap: 10px; color: #94a3b8; }
+.separador-login::before, .separador-login::after { content: ''; height: 1px; flex: 1; background: #e2e8f0; }
+.botao-link-login { border: 0; background: transparent; color: #2563eb; cursor: pointer; font-weight: 700; }
+.botao-sair-conta { position: fixed; top: 14px; right: 14px; z-index: 1000; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #334155; font-weight: 700; cursor: pointer; }
+
 .modal-fundo {
   position: fixed;
   inset: 0;

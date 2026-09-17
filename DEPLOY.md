@@ -27,3 +27,21 @@ docker compose down
 O `DATABASE_URL` é ligado automaticamente ao PostgreSQL do Render. O servidor cria as tabelas usando `e-cormeci/database/schema.sql` na primeira inicialização.
 
 Não envie o arquivo `.env` para o GitHub. Os segredos devem ser cadastrados em **Environment** no Render.
+
+## Autenticação na Vercel
+
+No Firebase Console, ative os provedores **Google** e **E-mail/senha** em Authentication.
+Depois cadastre o domínio da Vercel em Authentication > Settings > Authorized domains.
+
+Na Vercel, adicione estas variáveis para o frontend:
+
+```env
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_STORAGE_BUCKET=...
+VITE_FIREBASE_MESSAGING_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
+```
+
+Esses valores ficam na configuração do aplicativo Web do Firebase. Eles podem estar no frontend; as senhas dos usuários são processadas pelo Firebase e não devem ser colocadas neste projeto.
