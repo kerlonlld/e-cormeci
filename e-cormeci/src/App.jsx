@@ -4,7 +4,8 @@ import { LocalizacaoMaps } from './LocalizacaoMaps'
 import { AdminPanel } from './AdminPanel'
 import { DeliveryPanel } from './DeliveryPanel'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL
+  || (import.meta.env.DEV ? 'http://localhost:3001' : window.location.origin)
 
 // 1. Dados dos produtos (Fora do componente para evitar recriação na render)
 const PRODUTOS = [
@@ -599,7 +600,7 @@ export default function App() {
     const carregarProdutos = async () => {
       try {
         const resposta = await fetch(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/produtos`
+          `${API}/api/produtos`
         )
 
         if (!resposta.ok) {
@@ -633,7 +634,7 @@ export default function App() {
     const carregarHistorico = async () => {
       try {
         const resposta = await fetch(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/pedidos`
+          `${API}/api/pedidos`
         )
 
         if (!resposta.ok) throw new Error('Não foi possível carregar o histórico.')
@@ -754,7 +755,7 @@ export default function App() {
 
   const cancelarCompra = async (id) => {
     const resposta = await fetch(
-      `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/pedidos/${id}/cancelar`,
+      `${API}/api/pedidos/${id}/cancelar`,
       { method: 'POST' }
     )
     const dados = await resposta.json()
