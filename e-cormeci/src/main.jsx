@@ -6,11 +6,16 @@ import { AuthGate } from './AuthGate.jsx'
 import { AdminPanel } from './AdminPanel.jsx'
 import { DeliveryPanel } from './DeliveryPanel.jsx'
 
-const siteRole = import.meta.env.VITE_SITE_ROLE || 'cliente'
+const caminho = window.location.pathname.toLowerCase().replace(/\/+$/, '') || '/'
+const siteRole = caminho === '/admim' || caminho === '/admin'
+  ? 'admin'
+  : caminho === '/entegrador' || caminho === '/entregador'
+    ? 'entregador'
+    : import.meta.env.VITE_SITE_ROLE || 'cliente'
 
 function Site() {
-  if (siteRole === 'admin') return <AdminPanel />
-  if (siteRole === 'entregador') return <DeliveryPanel />
+  if (siteRole === 'admin') return <AdminPanel onVoltar={() => { window.location.href = '/' }} />
+  if (siteRole === 'entregador') return <DeliveryPanel onVoltar={() => { window.location.href = '/' }} />
 
   return (
     <AuthGate>
