@@ -1,0 +1,6 @@
+{
+  "installCommand": "npm ci --prefix e-cormeci",
+  "buildCommand": "npm run build --prefix e-cormeci",
+  "outputDirectory": "e-cormeci/dist",
+  "framework": "vite"
+}
