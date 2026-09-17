@@ -44,4 +44,14 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=...
 VITE_FIREBASE_APP_ID=...
 ```
 
+## Três sites separados
+
+Crie três projetos na Vercel usando a mesma branch `fullstack-render-completo` e configure `VITE_SITE_ROLE`:
+
+- Loja do cliente: `VITE_SITE_ROLE=cliente`
+- Painel administrativo: `VITE_SITE_ROLE=admin`
+- Painel do entregador: `VITE_SITE_ROLE=entregador`
+
+Todos os três precisam de `VITE_API_URL` apontando para a API do Render. O site do cliente usa também as variáveis do Firebase. Admin e entregador exibem apenas seus próprios formulários de acesso e não dependem do login do cliente.
+
 Esses valores ficam na configuração do aplicativo Web do Firebase. Eles podem estar no frontend; as senhas dos usuários são processadas pelo Firebase e não devem ser colocadas neste projeto.

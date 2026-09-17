@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import { LocalizacaoMaps } from './LocalizacaoMaps'
-import { AdminPanel } from './AdminPanel'
-import { DeliveryPanel } from './DeliveryPanel'
 
 const API = import.meta.env.VITE_API_URL
   || (import.meta.env.DEV ? 'http://localhost:3001' : window.location.origin)
@@ -204,13 +202,11 @@ function useDraggable(posicaoInicial = { x: 20, y: 100 }) {
 }
 
 // 3. Subcomponentes
-function Header({ totalItens, onAlternarCarrinho, onAdmin, onDelivery, onSair }) {
+function Header({ totalItens, onAlternarCarrinho, onSair }) {
   return (
     <header className="cabecalho">
       <h1 className="titulo">Minha Loja Virtual</h1>
       <div className="cabecalho-acoes">
-        <button type="button" className="botao-acesso" onClick={onDelivery}>🚚 Entregas</button>
-        <button type="button" className="botao-acesso" onClick={onAdmin}>⚙️ Admin</button>
         <button type="button" className="botao-acesso" onClick={onSair}>Sair</button>
         <button
           type="button"
@@ -500,7 +496,6 @@ export default function App({ usuario, onSair }) {
     }
   })
   const [pesquisa, setPesquisa] = useState('')
-  const [modoAcesso, setModoAcesso] = useState('cliente')
   const [codigoEntregaAtual, setCodigoEntregaAtual] = useState(() => localStorage.getItem(chaveArmazenamento('codigo-entrega-e-cormeci')) || '')
   const [carrinhoAberto, setCarrinhoAberto] = useState(false)
   const [fechadoManualmente, setFechadoManualmente] = useState(false)
@@ -846,9 +841,6 @@ export default function App({ usuario, onSair }) {
     alert(`Pagamento confirmado. Transação: ${dados.idTransacao}`)
   }
 
-  if (modoAcesso === 'admin') return <AdminPanel onVoltar={() => setModoAcesso('cliente')} />
-  if (modoAcesso === 'entregador') return <DeliveryPanel onVoltar={() => setModoAcesso('cliente')} />
-
   return <div
       className="loja"
       onMouseMove={duranteArrasto}
@@ -867,8 +859,6 @@ export default function App({ usuario, onSair }) {
       <Header
         totalItens={totalItens}
         onAlternarCarrinho={alternarCarrinho}
-        onAdmin={() => setModoAcesso('admin')}
-        onDelivery={() => setModoAcesso('entregador')}
         onSair={onSair}
       />
 
