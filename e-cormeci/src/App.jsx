@@ -502,7 +502,10 @@ export default function App() {
   const [codigoEntregaAtual, setCodigoEntregaAtual] = useState(() => localStorage.getItem('codigo-entrega-e-cormeci') || '')
   const [carrinhoAberto, setCarrinhoAberto] = useState(false)
   const [fechadoManualmente, setFechadoManualmente] = useState(false)
-  const [abaAtiva, setAbaAtiva] = useState('home')
+  const [abaAtiva, setAbaAtiva] = useState(() => {
+    const abaSalva = localStorage.getItem('aba-ativa-e-cormeci')
+    return ['home', 'compras', 'perfil'].includes(abaSalva) ? abaSalva : 'home'
+  })
   const [pagamentoAberto, setPagamentoAberto] = useState(null)
   const [historicoCompras, setHistoricoCompras] = useState(() => {
     try {
@@ -543,6 +546,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('dados-pessoais-confirmados-e-cormeci', JSON.stringify(dadosPessoaisConfirmados))
   }, [dadosPessoaisConfirmados])
+
+  useEffect(() => {
+    localStorage.setItem('aba-ativa-e-cormeci', abaAtiva)
+  }, [abaAtiva])
 
   useEffect(() => {
     localStorage.setItem('historico-e-cormeci', JSON.stringify(historicoCompras))
