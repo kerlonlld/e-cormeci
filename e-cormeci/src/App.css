@@ -763,6 +763,20 @@ body {
   font-size: 0.9rem;
 }
 
+input:not([type='file']),
+textarea,
+select {
+  background-color: #fff !important;
+  color: #1e293b !important;
+  color-scheme: light;
+}
+
+input:not([type='file'])::placeholder,
+textarea::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
 .botao-busca {
   padding: 10px 14px;
   background-color: #10b981;
