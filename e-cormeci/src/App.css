@@ -218,6 +218,17 @@ body {
 .mensagem-erro { color: #b91c1c; margin: 0; }
 .mensagem-sucesso { color: #15803d; margin: 0 0 12px; }
 .texto-vazio { color: #64748b; }
+.secao-ofertas { margin: 0 0 18px; padding: 16px; border: 1px solid #fde68a; border-radius: 12px; background: #fffbeb; }
+.ofertas-cabecalho h2 { margin: 3px 0 12px; color: #78350f; }
+.grade-ofertas { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.card-oferta { display: grid; grid-template-columns: 58px 1fr auto; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; background: #fff; }
+.card-oferta img { width: 58px; height: 58px; object-fit: cover; border-radius: 8px; }
+.card-oferta p { margin: 3px 0 0; color: #64748b; font-size: .86rem; }
+.card-oferta b { color: #b45309; white-space: nowrap; }
+.promocoes-admin { max-width: 1100px; margin: 0 auto 20px; }
+.form-promocao { display: grid; grid-template-columns: repeat(5, minmax(120px, 1fr)) auto; gap: 8px; }
+.form-promocao input, .form-promocao select { min-width: 0; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; }
+.lista-promocoes-admin { margin-top: 12px; }
 
 .login-cliente { display: grid; place-items: center; }
 .login-cliente h1 { margin: 0; color: #0f172a; font-size: 2rem; }

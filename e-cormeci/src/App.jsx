@@ -474,6 +474,7 @@ function PagamentoModal({ pedido, onFechar, onSelecionar, onPagamentoConfirmado 
 export default function App({ usuario, onSair }) {
   const chaveArmazenamento = (nome) => `${nome}-${usuario.uid}`
   const [produtos, setProdutos] = useState([])
+  const [promocoes, setPromocoes] = useState([])
   const [carregandoProdutos, setCarregandoProdutos] = useState(true)
   const [erroProdutos, setErroProdutos] = useState('')
   const [perfil, setPerfil] = useState(() => {
@@ -635,6 +636,13 @@ export default function App({ usuario, onSair }) {
   }, [])
 
   useEffect(() => {
+    fetch(`${API}/api/promocoes`)
+      .then((resposta) => resposta.ok ? resposta.json() : [])
+      .then(setPromocoes)
+      .catch(() => setPromocoes([]))
+  }, [])
+
+  useEffect(() => {
     const carregarHistorico = async () => {
       try {
         const resposta = await fetch(`${API}/api/pedidos?clienteId=${encodeURIComponent(usuario.uid)}`)
@@ -669,7 +677,7 @@ export default function App({ usuario, onSair }) {
     : 0
 
   const localizacaoConfirmada = Boolean(localizacaoUsuario && localizacaoUsuario.confirmado)
-  const localizacaoValida = localizacaoConfirmada && distanciaKm <= 20
+  const localizacaoValida = localizacaoConfirmada
   const valorFrete = localizacaoValida ? 10 : 0
   const totalComFrete = totalCarrinho + valorFrete
 
@@ -784,11 +792,6 @@ export default function App({ usuario, onSair }) {
       return
     }
 
-    if (distanciaKm > 20) {
-      alert('Entrega indisponível: seu endereço está fora do raio de 20 km da loja.')
-      return
-    }
-
     setPagamentoAberto({ modo: 'selecao', valor: totalComFrete })
   }
 
@@ -888,6 +891,23 @@ export default function App({ usuario, onSair }) {
             )}
 
             <h2 className="secao-titulo">Nossos Produtos</h2>
+
+            {promocoes.length > 0 && (
+              <section className="secao-ofertas">
+                <div className="ofertas-cabecalho">
+                  <div><span className="rotulo-cartao">Ofertas da loja</span><h2>Descontos e novidades</h2></div>
+                </div>
+                <div className="grade-ofertas">
+                  {promocoes.map((promocao) => (
+                    <article className="card-oferta" key={promocao.id}>
+                      {promocao.img && <img src={promocao.img} alt="" />}
+                      <div><strong>{promocao.titulo}</strong><p>{promocao.descricao}</p></div>
+                      <b>{promocao.tipo === 'desconto' ? `${Number(promocao.valor).toFixed(0)}% OFF` : promocao.tipo === 'oferta' ? `R$ ${Number(promocao.valor).toFixed(2)}` : 'Novidade'}</b>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            )}
 
             <input
               type="text"

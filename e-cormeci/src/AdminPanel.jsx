@@ -10,6 +10,8 @@ export function AdminPanel({ onVoltar }) {
   const [produtos, setProdutos] = useState([])
   const [pagamentos, setPagamentos] = useState([])
   const [resumoCompras, setResumoCompras] = useState(null)
+  const [promocoes, setPromocoes] = useState([])
+  const [promocao, setPromocao] = useState({ titulo: '', descricao: '', tipo: 'desconto', valor: '', imagem: '' })
   const [produto, setProduto] = useState({ nome: '', descricao: '', preco: '', estoque: '', imagem: '' })
   const [produtoEditando, setProdutoEditando] = useState(null)
   const [mensagem, setMensagem] = useState('')
@@ -43,11 +45,17 @@ export function AdminPanel({ onVoltar }) {
     if (resposta.ok) setResumoCompras(await resposta.json())
   }
 
+  const carregarPromocoes = async () => {
+    const resposta = await fetch(`${API}/api/promocoes`)
+    if (resposta.ok) setPromocoes(await resposta.json())
+  }
+
   useEffect(() => {
     if (!token) return
     carregarProdutos().catch(() => setMensagem('Não foi possível carregar os produtos.'))
     carregarPagamentos().catch(() => setMensagem('Não foi possível carregar os pagamentos.'))
     carregarResumoCompras().catch(() => setMensagem('Não foi possível carregar o resumo de compras.'))
+    carregarPromocoes().catch(() => setMensagem('Não foi possível carregar as ofertas.'))
     const intervalo = setInterval(() => {
       carregarPagamentos().catch(() => {})
       carregarResumoCompras().catch(() => {})
@@ -65,6 +73,29 @@ export function AdminPanel({ onVoltar }) {
     if (!resposta.ok) return setMensagem(dados.error || 'Não foi possível confirmar o pagamento.')
     setPagamentos((lista) => lista.filter((pagamento) => pagamento.id !== id))
     setMensagem(`Pagamento confirmado. Transação: ${dados.idTransacao}`)
+  }
+
+  const salvarPromocao = async (evento) => {
+    evento.preventDefault()
+    const resposta = await fetch(`${API}/api/admin/promocoes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ ...promocao, valor: Number(promocao.valor || 0) }),
+    })
+    const dados = await resposta.json()
+    if (encerrarSessaoExpirada(resposta)) return
+    if (!resposta.ok) return setMensagem(dados.error || 'Não foi possível criar a oferta.')
+    setPromocoes((lista) => [dados, ...lista])
+    setPromocao({ titulo: '', descricao: '', tipo: 'desconto', valor: '', imagem: '' })
+    setMensagem('Oferta/anúncio publicado.')
+  }
+
+  const removerPromocao = async (id) => {
+    const resposta = await fetch(`${API}/api/admin/promocoes/${id}`, {
+      method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+    })
+    if (encerrarSessaoExpirada(resposta)) return
+    if (resposta.ok) setPromocoes((lista) => lista.filter((item) => item.id !== id))
   }
 
   const entrar = async (evento) => {
@@ -161,6 +192,22 @@ export function AdminPanel({ onVoltar }) {
           </div>
         </section>
       )}
+      <section className="perfil-cartao promocoes-admin">
+        <h2>Ofertas, descontos e anúncios</h2>
+        <form className="form-promocao" onSubmit={salvarPromocao}>
+          <input placeholder="Título" value={promocao.titulo} onChange={(e) => setPromocao({ ...promocao, titulo: e.target.value })} required />
+          <input placeholder="Descrição" value={promocao.descricao} onChange={(e) => setPromocao({ ...promocao, descricao: e.target.value })} />
+          <select value={promocao.tipo} onChange={(e) => setPromocao({ ...promocao, tipo: e.target.value })}>
+            <option value="desconto">Desconto (%)</option><option value="oferta">Oferta (valor)</option><option value="anuncio">Anúncio</option>
+          </select>
+          <input type="number" min="0" step="0.01" placeholder="Valor" value={promocao.valor} onChange={(e) => setPromocao({ ...promocao, valor: e.target.value })} />
+          <input type="url" placeholder="URL da imagem (opcional)" value={promocao.imagem} onChange={(e) => setPromocao({ ...promocao, imagem: e.target.value })} />
+          <button className="botao-confirmar" type="submit">Publicar</button>
+        </form>
+        <div className="lista-promocoes-admin">
+          {promocoes.map((item) => <div className="linha-pagamento" key={item.id}><div><strong>{item.titulo}</strong><span>{item.tipo} · {item.descricao}</span></div><button className="botao-perigo" onClick={() => removerPromocao(item.id)}>Remover</button></div>)}
+        </div>
+      </section>
       <section className="painel-grid">
         <form className="perfil-cartao" onSubmit={salvarProduto}>
           <h2>{produtoEditando ? 'Editar produto' : 'Adicionar produto'}</h2>

@@ -118,6 +118,19 @@ app.get('/api/produtos', async (_req, res) => {
     }
 })
 
+app.get('/api/promocoes', async (_req, res) => {
+    try {
+        const resultado = await pool.query(
+            `SELECT id, titulo, descricao, tipo, valor, imagem AS img
+             FROM promocoes WHERE ativo = true ORDER BY criado_em DESC`
+        )
+        res.json(resultado.rows)
+    } catch (error) {
+        console.error('Erro ao buscar promoções:', error)
+        res.status(500).json({ error: 'Erro ao buscar promoções' })
+    }
+})
+
 app.post('/api/admin/produtos', exigirSessao('admin'), async (req, res) => {
     const { nome, descricao = '', preco, estoque = 0, imagem = '' } = req.body
 
@@ -136,6 +149,34 @@ app.post('/api/admin/produtos', exigirSessao('admin'), async (req, res) => {
     } catch (error) {
         console.error('Erro ao criar produto:', error)
         res.status(500).json({ error: 'Erro ao criar produto' })
+    }
+})
+
+app.post('/api/admin/promocoes', exigirSessao('admin'), async (req, res) => {
+    const { titulo, descricao = '', tipo = 'desconto', valor = 0, imagem = '' } = req.body
+    if (!titulo?.trim()) return res.status(400).json({ error: 'Título da oferta é obrigatório' })
+
+    try {
+        const resultado = await pool.query(
+            `INSERT INTO promocoes (titulo, descricao, tipo, valor, imagem)
+             VALUES ($1, $2, $3, $4, $5)
+             RETURNING id, titulo, descricao, tipo, valor, imagem AS img`,
+            [titulo.trim(), descricao.trim(), tipo, Number(valor), imagem.trim()]
+        )
+        res.status(201).json(resultado.rows[0])
+    } catch (error) {
+        console.error('Erro ao criar promoção:', error)
+        res.status(500).json({ error: 'Erro ao criar promoção' })
+    }
+})
+
+app.delete('/api/admin/promocoes/:id', exigirSessao('admin'), async (req, res) => {
+    try {
+        await pool.query('UPDATE promocoes SET ativo = false WHERE id = $1', [req.params.id])
+        res.status(204).end()
+    } catch (error) {
+        console.error('Erro ao remover promoção:', error)
+        res.status(500).json({ error: 'Erro ao remover promoção' })
     }
 })
 
@@ -491,6 +532,16 @@ async function iniciarServidor() {
         ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS gateway_pagamento_id VARCHAR(100);
         ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS pix_copia_e_cola TEXT;
         ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS pix_qr_code_base64 TEXT;
+        CREATE TABLE IF NOT EXISTS promocoes (
+            id SERIAL PRIMARY KEY,
+            titulo VARCHAR(150) NOT NULL,
+            descricao TEXT NOT NULL DEFAULT '',
+            tipo VARCHAR(20) NOT NULL DEFAULT 'desconto',
+            valor NUMERIC(10, 2) NOT NULL DEFAULT 0,
+            imagem TEXT NOT NULL DEFAULT '',
+            ativo BOOLEAN NOT NULL DEFAULT TRUE,
+            criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
         CREATE INDEX IF NOT EXISTS idx_pedidos_status ON pedidos (status);
     `)
 
