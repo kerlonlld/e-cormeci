@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 export function LocalizacaoMaps({ onLocalizacaoChange, editar = false, onEdicaoConcluida, onEditar }) {
+  // Captura cidade e endereço para permitir entrega em qualquer local informado.
   const [cidade, setCidade] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('endereco-cidade-e-cormeci')) || ''

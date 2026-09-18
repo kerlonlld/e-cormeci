@@ -12,6 +12,7 @@ import { auth } from './firebase'
 const googleProvider = new GoogleAuthProvider()
 
 export function AuthGate({ children }) {
+  // Mantém o usuário Firebase e controla os estados da tela de login.
   const [usuario, setUsuario] = useState(null)
   const [carregando, setCarregando] = useState(true)
   const [modoCadastro, setModoCadastro] = useState(false)
@@ -21,11 +22,13 @@ export function AuthGate({ children }) {
   const [processando, setProcessando] = useState(false)
 
   useEffect(() => onAuthStateChanged(auth, (usuarioAtual) => {
+    // O Firebase restaura automaticamente a sessão salva no navegador.
     setUsuario(usuarioAtual)
     setCarregando(false)
   }), [])
 
   const entrarComGoogle = async () => {
+    // Abre o fluxo seguro de autenticação Google.
     setErro('')
     setProcessando(true)
     try {
@@ -40,6 +43,7 @@ export function AuthGate({ children }) {
   }
 
   const entrarComEmail = async (evento) => {
+    // Faz login ou cria uma conta usando e-mail e senha.
     evento.preventDefault()
     setErro('')
     setProcessando(true)
@@ -64,6 +68,7 @@ export function AuthGate({ children }) {
 
   if (carregando) return <main className="painel-acesso"><p>Carregando acesso...</p></main>
   if (usuario) {
+    // Só libera a loja depois que o usuário estiver autenticado.
     return (
       <>
         {cloneElement(children, { usuario, onSair: () => signOut(auth) })}

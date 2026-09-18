@@ -4,6 +4,7 @@ const API = import.meta.env.VITE_API_URL
   || (import.meta.env.DEV ? 'http://localhost:3001' : window.location.origin)
 
 export function DeliveryPanel({ onVoltar }) {
+  // Sessão exclusiva do entregador e lista dos pedidos liberados para entrega.
   const [token, setToken] = useState(() => localStorage.getItem('delivery-token-e-cormeci') || '')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
@@ -12,6 +13,7 @@ export function DeliveryPanel({ onVoltar }) {
   const [mensagem, setMensagem] = useState('')
 
   const carregarPedidos = async () => {
+    // Atualiza os pedidos liberados pelo pagamento ou pelo método presencial.
     const resposta = await fetch(`${API}/api/entregas/pedidos`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -52,6 +54,7 @@ export function DeliveryPanel({ onVoltar }) {
   }
 
   const confirmar = async (id) => {
+    // Confirma recebimento do dinheiro/cartão e entrega usando o código do cliente.
     const resposta = await fetch(`${API}/api/entregas/pedidos/${id}/confirmar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },

@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 
 const firebaseConfig = {
+  // Configuração pública do aplicativo Web; segredos ficam no Firebase/Render.
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyAZPOEqoUOKztz5XQz3ElFOhirfTWk6f_4',
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'e-cormeci-83c59.firebaseapp.com',
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'e-cormeci-83c59',
@@ -12,4 +13,5 @@ const firebaseConfig = {
 }
 
 const firebaseApp = initializeApp(firebaseConfig)
+// Instância usada pelo AuthGate para login e logout.
 export const auth = getAuth(firebaseApp)

@@ -6,6 +6,7 @@ import { AuthGate } from './AuthGate.jsx'
 import { AdminPanel } from './AdminPanel.jsx'
 import { DeliveryPanel } from './DeliveryPanel.jsx'
 
+// Escolhe qual experiência será exibida conforme a URL acessada.
 const caminho = window.location.pathname.toLowerCase().replace(/\/+$/, '') || '/'
 const siteRole = caminho === '/admim' || caminho === '/admin'
   ? 'admin'
@@ -14,6 +15,7 @@ const siteRole = caminho === '/admim' || caminho === '/admin'
     : import.meta.env.VITE_SITE_ROLE || 'cliente'
 
 function Site() {
+  // Cada painel tem uma rota própria e não aparece dentro da loja do cliente.
   if (siteRole === 'admin') return <AdminPanel onVoltar={() => { window.location.href = '/' }} />
   if (siteRole === 'entregador') return <DeliveryPanel onVoltar={() => { window.location.href = '/' }} />
 

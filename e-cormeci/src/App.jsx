@@ -5,7 +5,9 @@ import { LocalizacaoMaps } from './LocalizacaoMaps'
 const API = import.meta.env.VITE_API_URL
   || (import.meta.env.DEV ? 'http://localhost:3001' : window.location.origin)
 
-// 1. Dados dos produtos (Fora do componente para evitar recriação na render)
+// URL única da API, trocada automaticamente entre desenvolvimento e produção.
+
+// Catálogo local usado como fallback visual quando a API não tem imagem cadastrada.
 const PRODUTOS = [
   {
     id: 1,
@@ -116,6 +118,7 @@ function calcularDistanciaEmKm(lat1, lon1, lat2, lon2) {
 }
 
 function normalizarItensCompra(itens) {
+  // Padroniza itens antigos e novos para o mesmo formato usado pelo histórico.
   if (!Array.isArray(itens)) return []
 
   return itens.map((item) => {
@@ -148,6 +151,7 @@ function normalizarItensCompra(itens) {
 }
 
 function normalizarHistoricoCompras(compras) {
+  // Converte valores vindos do PostgreSQL para tipos adequados ao React.
   if (!Array.isArray(compras)) return []
 
   return compras.map((compra) => ({
@@ -160,6 +164,7 @@ function normalizarHistoricoCompras(compras) {
 
 // 2. Custom Hook para a funcionalidade de arrastar
 function useDraggable(posicaoInicial = { x: 20, y: 100 }) {
+  // Hook que permite arrastar o carrinho com mouse ou toque.
   const [posicao, setPosicao] = useState(posicaoInicial)
   const [arrastando, setArrastando] = useState(false)
   const offset = useRef({ x: 0, y: 0 })
@@ -203,6 +208,7 @@ function useDraggable(posicaoInicial = { x: 20, y: 100 }) {
 
 // 3. Subcomponentes
 function Header({ totalItens, onAlternarCarrinho, onSair }) {
+  // Cabeçalho exclusivo da loja do cliente.
   return (
     <header className="cabecalho">
       <h1 className="titulo">Minha Loja Virtual</h1>
@@ -364,6 +370,7 @@ function SidebarCarrinho({
 }
 
 function PagamentoModal({ pedido, onFechar, onSelecionar, onPagamentoConfirmado }) {
+  // Exibe escolha do método e acompanha a confirmação do pagamento.
   const [metodoSelecionado, setMetodoSelecionado] = useState('pix')
   const [chaveCopiada, setChaveCopiada] = useState(false)
   const [segundosRestantes, setSegundosRestantes] = useState(() => {
@@ -472,7 +479,9 @@ function PagamentoModal({ pedido, onFechar, onSelecionar, onPagamentoConfirmado 
 
 // 4. Componente Principal
 export default function App({ usuario, onSair }) {
+  // Identificador que impede mistura de dados entre contas diferentes.
   const chaveArmazenamento = (nome) => `${nome}-${usuario.uid}`
+  // Estados principais da loja, carrinho, conta e histórico.
   const [produtos, setProdutos] = useState([])
   const [promocoes, setPromocoes] = useState([])
   const [carregandoProdutos, setCarregandoProdutos] = useState(true)
@@ -538,18 +547,22 @@ export default function App({ usuario, onSair }) {
   })
 
   useEffect(() => {
+    // Persiste endereço e dados pessoais somente para a conta atual.
     localStorage.setItem(chaveArmazenamento('localizacao-e-cormeci'), JSON.stringify(localizacaoUsuario))
   }, [localizacaoUsuario])
 
   useEffect(() => {
+    // Guarda a aba atual para restaurá-la depois de atualizar a página.
     localStorage.setItem(chaveArmazenamento('dados-pessoais-confirmados-e-cormeci'), JSON.stringify(dadosPessoaisConfirmados))
   }, [dadosPessoaisConfirmados])
 
   useEffect(() => {
+    // Busca produtos disponíveis no banco do backend.
     localStorage.setItem(chaveArmazenamento('aba-ativa-e-cormeci'), abaAtiva)
   }, [abaAtiva])
 
   useEffect(() => {
+    // Sincroniza os pedidos da conta autenticada com o servidor.
     localStorage.setItem(chaveArmazenamento('historico-e-cormeci'), JSON.stringify(historicoCompras))
   }, [historicoCompras])
 
@@ -716,6 +729,7 @@ export default function App({ usuario, onSair }) {
   }
 
   const adicionarProduto = (produtoAdicionado) => {
+    // Adiciona ou incrementa um produto dentro do carrinho atual.
     setCarrinho((itensAtuais) => {
       const produtoExistente = itensAtuais.find((item) => item.id === produtoAdicionado.id)
 
@@ -781,6 +795,7 @@ export default function App({ usuario, onSair }) {
   }
 
   const finalizarCompra = async () => {
+    // Valida endereço e abre a escolha de pagamento antes de criar o pedido.
     if (totalItens === 0) {
       alert('O carrinho está vazio. Adicione produtos antes de finalizar a compra.')
       return
@@ -796,6 +811,7 @@ export default function App({ usuario, onSair }) {
   }
 
   const criarPedido = async (metodoPagamento) => {
+    // Envia o pedido com a conta do cliente e o método escolhido.
     const valorFinalCompra = totalComFrete
 
     try {

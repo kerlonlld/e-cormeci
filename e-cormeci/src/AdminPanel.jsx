@@ -4,6 +4,7 @@ const API = import.meta.env.VITE_API_URL
   || (import.meta.env.DEV ? 'http://localhost:3001' : window.location.origin)
 
 export function AdminPanel({ onVoltar }) {
+  // Sessão própria do administrador, separada do login do cliente.
   const [token, setToken] = useState(() => localStorage.getItem('admin-token-e-cormeci') || '')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
@@ -25,11 +26,13 @@ export function AdminPanel({ onVoltar }) {
   }
 
   const carregarProdutos = async () => {
+    // Carrega o catálogo que o administrador pode editar.
     const resposta = await fetch(`${API}/api/produtos`)
     if (resposta.ok) setProdutos(await resposta.json())
   }
 
   const carregarPagamentos = async () => {
+    // Consulta pagamentos PIX que ainda aguardam confirmação automática.
     const resposta = await fetch(`${API}/api/admin/pagamentos`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -38,6 +41,7 @@ export function AdminPanel({ onVoltar }) {
   }
 
   const carregarResumoCompras = async () => {
+    // Atualiza os indicadores de vendas do dia, semana e mês.
     const resposta = await fetch(`${API}/api/admin/resumo-compras`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -76,6 +80,7 @@ export function AdminPanel({ onVoltar }) {
   }
 
   const salvarPromocao = async (evento) => {
+    // Publica uma oferta, desconto ou anúncio na loja do cliente.
     evento.preventDefault()
     const resposta = await fetch(`${API}/api/admin/promocoes`, {
       method: 'POST',

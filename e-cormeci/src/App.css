@@ -798,6 +798,15 @@ textarea::placeholder {
   opacity: 1;
 }
 
+input:not([type='file']):-webkit-autofill,
+input:not([type='file']):-webkit-autofill:hover,
+input:not([type='file']):-webkit-autofill:focus {
+  -webkit-text-fill-color: #1e293b !important;
+  -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+  box-shadow: 0 0 0 1000px #fff inset !important;
+  caret-color: #1e293b;
+}
+
 .botao-busca {
   padding: 10px 14px;
   background-color: #10b981;
