@@ -379,7 +379,7 @@ function PagamentoModal({ pedido, onFechar, onSelecionar, onPagamentoConfirmado 
   }, [])
 
   useEffect(() => {
-    if (!pedido.id) return undefined
+    if (!pedido.id || pedido.metodoPagamento !== 'pix') return undefined
     const consultar = async () => {
       const resposta = await fetch(`${API}/api/pedidos/${pedido.id}/pagamento`)
       if (!resposta.ok) return
@@ -461,9 +461,9 @@ function PagamentoModal({ pedido, onFechar, onSelecionar, onPagamentoConfirmado 
           </div>
         )}
 
-        {pedido.metodoPagamento === 'cartao' && <p>O pagamento será conferido pelo administrador antes da entrega.</p>}
-        {pedido.metodoPagamento === 'dinheiro' && <p>O pagamento será conferido pelo administrador antes de liberar a entrega.</p>}
-        <p className="mensagem-pagamento">Aguardando confirmação do pagamento...</p>
+        {pedido.metodoPagamento === 'cartao' && <p>Pagamento registrado. O entregador confirmará na entrega usando o código.</p>}
+        {pedido.metodoPagamento === 'dinheiro' && <p>Pagamento na entrega. O entregador confirmará o recebimento usando o código.</p>}
+        {pedido.metodoPagamento === 'pix' && <p className="mensagem-pagamento">Aguardando confirmação automática do banco...</p>}
         <button type="button" className="botao-secundario" onClick={onFechar}>Continuar acompanhando</button>
       </section>
     </div>

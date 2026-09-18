@@ -235,7 +235,11 @@ app.post('/api/pedidos', async (req, res) => {
         const pedido = await cliente.query(
             `INSERT INTO pedidos
                      (cliente_id, valor_total, endereco_entrega, codigo_entrega, status, metodo_pagamento, status_pagamento, id_transacao, chave_pix, pagamento_expira_em)
-                 VALUES ($1, $2, $3, $4, 'aguardando_pagamento', $5, 'pendente', $6, $7, NOW() + INTERVAL '10 minutes')
+                     VALUES ($1, $2, $3, $4,
+                         CASE WHEN $5 = 'pix' THEN 'aguardando_pagamento' ELSE 'aguardando_entrega' END,
+                         $5,
+                         CASE WHEN $5 = 'pix' THEN 'pendente' ELSE 'pago' END,
+                         $6, $7, NOW() + INTERVAL '10 minutes')
              RETURNING id, valor_total AS valor, criado_em AS data, status, endereco_entrega AS endereco,
                        metodo_pagamento AS "metodoPagamento", status_pagamento AS "statusPagamento",
                        id_transacao AS "idTransacao", chave_pix AS "chavePix", pagamento_expira_em AS "pagamentoExpiraEm"`,
