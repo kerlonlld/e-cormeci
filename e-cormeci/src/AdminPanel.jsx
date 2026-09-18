@@ -198,7 +198,7 @@ export function AdminPanel({ onVoltar }) {
         </section>
       )}
       <section className="perfil-cartao promocoes-admin">
-        <h2>Ofertas, descontos e anúncios</h2>
+        <h2 className='resumo-compra'>Ofertas, descontos e anúncios</h2>
         <form className="form-promocao" onSubmit={salvarPromocao}>
           <input placeholder="Título" value={promocao.titulo} onChange={(e) => setPromocao({ ...promocao, titulo: e.target.value })} required />
           <input placeholder="Descrição" value={promocao.descricao} onChange={(e) => setPromocao({ ...promocao, descricao: e.target.value })} />
@@ -215,7 +215,7 @@ export function AdminPanel({ onVoltar }) {
       </section>
       <section className="painel-grid">
         <form className="perfil-cartao" onSubmit={salvarProduto}>
-          <h2>{produtoEditando ? 'Editar produto' : 'Adicionar produto'}</h2>
+          <h2 className="resumo-compra">{produtoEditando ? 'Editar produto' : 'Adicionar produto'}</h2>
           <label>Nome<input value={produto.nome} onChange={(e) => setProduto({ ...produto, nome: e.target.value })} required /></label>
           <label>Descrição<input value={produto.descricao} onChange={(e) => setProduto({ ...produto, descricao: e.target.value })} /></label>
           <label>Preço<input type="number" min="0" step="0.01" value={produto.preco} onChange={(e) => setProduto({ ...produto, preco: e.target.value })} required /></label>
@@ -226,7 +226,7 @@ export function AdminPanel({ onVoltar }) {
           {mensagem && <p className="mensagem-sucesso">{mensagem}</p>}
         </form>
         <section className="perfil-cartao">
-          <h2>Produtos cadastrados</h2>
+          <h2 className="resumo-compra">Produtos cadastrados</h2>
           <div className="lista-admin-produtos">
             {produtos.map((item) => (
               <div className="linha-admin-produto" key={item.id}>
