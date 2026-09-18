@@ -170,7 +170,7 @@ export function AdminPanel({ onVoltar }) {
         <div className="painel-acoes"><button className="botao-secundario" onClick={onVoltar}>Loja</button><button className="botao-secundario" onClick={() => { localStorage.removeItem('admin-token-e-cormeci'); setToken('') }}>Sair</button></div>
       </div>
       <section className="perfil-cartao pagamentos-admin">
-        <h2>Pagamentos aguardando confirmação</h2>
+        <h2 className='resumo-compra'>Pagamentos aguardando confirmação</h2>
         {pagamentos.length === 0 && <p className="texto-vazio">Nenhum pagamento pendente.</p>}
         {pagamentos.map((pagamento) => (
           <div className="linha-pagamento" key={pagamento.id}>
