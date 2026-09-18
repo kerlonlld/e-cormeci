@@ -598,7 +598,10 @@ body {
   color: #374151;
   gap: 12px;
 }
+      .resumo-compra {
 
+        color :#1d4ed8
+      }
 .item-compra-conteudo {
   display: flex;
   align-items: center;

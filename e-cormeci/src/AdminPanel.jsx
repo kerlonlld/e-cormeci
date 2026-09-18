@@ -184,7 +184,7 @@ export function AdminPanel({ onVoltar }) {
       </section>
       {resumoCompras && (
         <section className="perfil-cartao resumo-compras-admin">
-          <h2>Resumo de compras</h2>
+          <h2 className='resumo-compra'>Resumo de compras</h2>
           <div className="tabela-resumo-scroll">
             <table className="tabela-resumo">
               <thead><tr><th>Período</th><th>Compras</th><th>Valor</th><th>Entregues</th></tr></thead>
