@@ -430,10 +430,10 @@ function PagamentoModal({ pedido, onFechar, onSelecionar, onPagamentoConfirmado 
 
   const copiarChavePix = async () => {
     try {
-      await navigator.clipboard.writeText(pedido.chavePix)
+      await navigator.clipboard.writeText(pedido.pixCopiaECola || pedido.chavePix)
     } catch {
       const campo = document.createElement('textarea')
-      campo.value = pedido.chavePix
+      campo.value = pedido.pixCopiaECola || pedido.chavePix
       document.body.appendChild(campo)
       campo.select()
       document.execCommand('copy')
@@ -452,8 +452,8 @@ function PagamentoModal({ pedido, onFechar, onSelecionar, onPagamentoConfirmado 
 
         {pedido.metodoPagamento === 'pix' && (
           <div className="pix-detalhes">
-            <p>Copie a chave PIX e faça o pagamento pelo banco.</p>
-            <code>{pedido.chavePix}</code>
+            <p>Copie o PIX copia e cola. O banco já receberá o valor do pedido.</p>
+            <code>{pedido.pixCopiaECola || pedido.chavePix}</code>
             <button type="button" className="botao-confirmar" onClick={copiarChavePix}>
               {chaveCopiada ? 'Chave copiada' : 'Copiar chave PIX'}
             </button>
@@ -803,6 +803,7 @@ export default function App({ usuario, onSair }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             clienteId: usuario.uid,
+            email: usuario.email,
             valorTotal: valorFinalCompra,
             metodoPagamento,
             endereco: localizacaoUsuario?.nomeLocal || 'Endereço não informado',

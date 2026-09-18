@@ -85,6 +85,9 @@ ALTER TABLE produtos ADD COLUMN IF NOT EXISTS imagem TEXT;
 ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS endereco_entrega TEXT;
 ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS codigo_entrega VARCHAR(6);
 ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS entregador_id INT;
+ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS gateway_pagamento_id VARCHAR(100);
+ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS pix_copia_e_cola TEXT;
+ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS pix_qr_code_base64 TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_pedidos_status
     ON pedidos (status);

@@ -52,6 +52,37 @@ function criarIdTransacao() {
     return `TRX-${Date.now()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`
 }
 
+async function criarCobrancaPixMercadoPago({ pedidoId, valor, email }) {
+    if (!process.env.MP_ACCESS_TOKEN) return null
+
+    const resposta = await fetch('https://api.mercadopago.com/v1/payments', {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
+            'Content-Type': 'application/json',
+            'X-Idempotency-Key': `pedido-${pedidoId}`,
+        },
+        body: JSON.stringify({
+            transaction_amount: Number(valor),
+            description: `Pedido e-cormeci #${pedidoId}`,
+            payment_method_id: 'pix',
+            payer: { email: email || process.env.ADMIN_EMAIL },
+            external_reference: String(pedidoId),
+            notification_url: process.env.MP_WEBHOOK_URL,
+        }),
+    })
+
+    const dados = await resposta.json()
+    if (!resposta.ok) throw new Error(dados.message || 'Mercado Pago recusou a cobrança PIX')
+
+    return {
+        id: String(dados.id),
+        status: dados.status,
+        copiaECola: dados.point_of_interaction?.transaction_data?.qr_code || '',
+        qrCodeBase64: dados.point_of_interaction?.transaction_data?.qr_code_base64 || '',
+    }
+}
+
 app.post('/api/acesso/login', (req, res) => {
     const { tipo, email, senha } = req.body
     const credenciais = tipo === 'admin'
@@ -153,6 +184,8 @@ app.get('/api/pedidos', async (req, res) => {
                 pedidos.id_transacao AS "idTransacao",
                 pedidos.chave_pix AS "chavePix",
                 pedidos.pagamento_expira_em AS "pagamentoExpiraEm",
+                pedidos.pix_copia_e_cola AS "pixCopiaECola",
+                pedidos.pix_qr_code_base64 AS "pixQrCodeBase64",
                 pedidos.endereco_entrega AS endereco,
                 pedidos.codigo_entrega AS "codigoEntrega",
                 COALESCE(
@@ -183,11 +216,14 @@ app.get('/api/pedidos', async (req, res) => {
 })
 
 app.post('/api/pedidos', async (req, res) => {
-    const { clienteId, valorTotal, itens, endereco, metodoPagamento } = req.body
+    const { clienteId, email, valorTotal, itens, endereco, metodoPagamento } = req.body
     const metodosPagamento = ['cartao', 'pix', 'dinheiro']
 
     if (!clienteId || !Number.isFinite(Number(valorTotal)) || !Array.isArray(itens) || itens.length === 0 || !metodosPagamento.includes(metodoPagamento)) {
         return res.status(400).json({ error: 'Pedido inválido' })
+    }
+    if (metodoPagamento === 'pix' && !process.env.MP_ACCESS_TOKEN) {
+        return res.status(503).json({ error: 'PIX automático ainda não está configurado no servidor' })
     }
 
     const cliente = await pool.connect()
@@ -214,8 +250,31 @@ app.post('/api/pedidos', async (req, res) => {
             )
         }
 
+        let cobrancaPix = null
+        if (metodoPagamento === 'pix') {
+            cobrancaPix = await criarCobrancaPixMercadoPago({
+                pedidoId: pedido.rows[0].id,
+                valor: valorTotal,
+                email,
+            })
+            if (cobrancaPix) {
+                await cliente.query(
+                    `UPDATE pedidos
+                     SET gateway_pagamento_id = $1, pix_copia_e_cola = $2, pix_qr_code_base64 = $3
+                     WHERE id = $4`,
+                    [cobrancaPix.id, cobrancaPix.copiaECola, cobrancaPix.qrCodeBase64, pedido.rows[0].id]
+                )
+            }
+        }
+
         await cliente.query('COMMIT')
-        res.status(201).json({ ...pedido.rows[0], codigoEntrega, itens })
+        res.status(201).json({
+            ...pedido.rows[0],
+            codigoEntrega,
+            itens,
+            pixCopiaECola: cobrancaPix?.copiaECola || pedido.rows[0].chavePix,
+            pixQrCodeBase64: cobrancaPix?.qrCodeBase64 || '',
+        })
     } catch (error) {
         await cliente.query('ROLLBACK')
         console.error('Erro ao salvar pedido:', error)
@@ -225,11 +284,36 @@ app.post('/api/pedidos', async (req, res) => {
     }
 })
 
+app.post('/api/pagamentos/mercadopago/webhook', async (req, res) => {
+    res.sendStatus(200)
+
+    const pagamentoId = req.body?.data?.id || req.query['data.id']
+    if (!pagamentoId || !process.env.MP_ACCESS_TOKEN) return
+
+    try {
+        const resposta = await fetch(`https://api.mercadopago.com/v1/payments/${pagamentoId}`, {
+            headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` },
+        })
+        const pagamento = await resposta.json()
+        if (!resposta.ok || pagamento.status !== 'approved') return
+
+        await pool.query(
+            `UPDATE pedidos
+             SET status_pagamento = 'pago', status = 'aguardando_entrega', pago_em = NOW()
+             WHERE id = $1 AND status_pagamento = 'pendente'`,
+            [pagamento.external_reference]
+        )
+    } catch (error) {
+        console.error('Erro no webhook do Mercado Pago:', error)
+    }
+})
+
 app.get('/api/pedidos/:id/pagamento', async (req, res) => {
     try {
         const resultado = await pool.query(
-            `SELECT id, status, status_pagamento AS "statusPagamento", metodo_pagamento AS "metodoPagamento",
-                    id_transacao AS "idTransacao", chave_pix AS "chavePix", pagamento_expira_em AS "pagamentoExpiraEm"
+                `SELECT id, status, status_pagamento AS "statusPagamento", metodo_pagamento AS "metodoPagamento",
+                    id_transacao AS "idTransacao", chave_pix AS "chavePix", pagamento_expira_em AS "pagamentoExpiraEm",
+                    pix_copia_e_cola AS "pixCopiaECola", pix_qr_code_base64 AS "pixQrCodeBase64"
              FROM pedidos WHERE id = $1`,
             [req.params.id]
         )
@@ -400,6 +484,9 @@ async function iniciarServidor() {
         ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS chave_pix TEXT;
         ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS pagamento_expira_em TIMESTAMP;
         ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS pago_em TIMESTAMP;
+        ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS gateway_pagamento_id VARCHAR(100);
+        ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS pix_copia_e_cola TEXT;
+        ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS pix_qr_code_base64 TEXT;
         CREATE INDEX IF NOT EXISTS idx_pedidos_status ON pedidos (status);
     `)
 
