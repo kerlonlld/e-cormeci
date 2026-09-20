@@ -223,6 +223,11 @@ function Header({ totalItens, onAlternarCarrinho, onSair }) {
         >
           🛒 {totalItens}
         </button>
+        <button>
+          <a href="https://e-cormeci.onrender.com/admin" target="_blank" rel="noopener noreferrer">
+            Painel Admin
+          </a>
+        </button>
       </div>
     </header>
   )
