@@ -213,6 +213,16 @@ function Header({ totalItens, onAlternarCarrinho, onSair }) {
     <header className="cabecalho">
       <h1 className="titulo">Minha Loja Virtual</h1>
       <div className="cabecalho-acoes">
+        <button>
+          <a href="https://e-cormeci.onrender.com/admin" target="_blank" rel="noopener noreferrer">
+            Painel Admin
+          </a>
+        </button>
+        <button>
+          <a href="https://e-cormeci.onrender.com/entregador" target="_blank" rel="noopener noreferrer">
+            Painel Entregador
+          </a>
+        </button>
         <button type="button" className="botao-acesso" onClick={onSair}>Sair</button>
         <button
           type="button"
@@ -223,11 +233,7 @@ function Header({ totalItens, onAlternarCarrinho, onSair }) {
         >
           🛒 {totalItens}
         </button>
-        <button>
-          <a href="https://e-cormeci.onrender.com/admin" target="_blank" rel="noopener noreferrer">
-            Painel Admin
-          </a>
-        </button>
+        
       </div>
     </header>
   )
