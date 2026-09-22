@@ -25,6 +25,10 @@ body {
 
 .botao-acesso,
 .botao-voltar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: #fff;
@@ -32,6 +36,22 @@ body {
   padding: 8px 10px;
   font-weight: 700;
   cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.botao-acesso:hover {
+  transform: translateY(-1px);
+  background: #f8fafc;
+  box-shadow: 0 5px 12px rgba(15, 23, 42, 0.16);
+}
+
+.botao-acesso-admin {
+  color: #1d4ed8;
+}
+
+.botao-acesso-entregas {
+  color: #047857;
 }
 
 .cartao-codigo-entrega {
@@ -1155,11 +1175,27 @@ input:not([type='file']):-webkit-autofill:focus {
 }
 
 @media (max-width: 640px) {
+  .cabecalho {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .titulo {
+    width: 100%;
+    font-size: 1.25rem;
+  }
+
   .cabecalho-acoes {
+    width: 100%;
     gap: 4px;
+    flex-wrap: wrap;
   }
 
   .botao-acesso {
+    flex: 1;
+    min-width: 92px;
     padding: 7px 5px;
     font-size: 0.68rem;
   }

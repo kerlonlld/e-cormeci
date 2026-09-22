@@ -213,16 +213,12 @@ function Header({ totalItens, onAlternarCarrinho, onSair }) {
     <header className="cabecalho">
       <h1 className="titulo">Minha Loja Virtual</h1>
       <div className="cabecalho-acoes">
-        <button>
-          <a href="https://e-cormeci.onrender.com/admin" target="_blank" rel="noopener noreferrer">
-            Painel Admin
-          </a>
-        </button>
-        <button>
-          <a href="https://e-cormeci.onrender.com/entregador" target="_blank" rel="noopener noreferrer">
-            Painel Entregador
-          </a>
-        </button>
+        <a className="botao-acesso botao-acesso-admin" href="https://e-cormeci.onrender.com/admin" target="_blank" rel="noopener noreferrer">
+          <span aria-hidden="true">⚙</span> Admin
+        </a>
+        <a className="botao-acesso botao-acesso-entregas" href="https://e-cormeci.onrender.com/entregador" target="_blank" rel="noopener noreferrer">
+          <span aria-hidden="true">🚚</span> Entregas
+        </a>
         <button type="button" className="botao-acesso" onClick={onSair}>Sair</button>
         <button
           type="button"
