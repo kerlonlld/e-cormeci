@@ -4,5 +4,5 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: './', // <-- Adicionar isso ajuda a evitar tela em branco por caminhos errados
+  base: '/', // <-- Altere para '/' para funcionar perfeitamente no Render
 })
