@@ -922,10 +922,14 @@ export default function App({ usuario, onSair }) {
                 </div>
                 <div className="grade-ofertas">
                   {promocoes.map((promocao) => (
-                    <article className="card-oferta" key={promocao.id}>
-                      {promocao.img && <img src={promocao.img} alt="" />}
-                      <div><strong>{promocao.titulo}</strong><p>{promocao.descricao}</p></div>
-                      <b>{promocao.tipo === 'desconto' ? `${Number(promocao.valor).toFixed(0)}% OFF` : promocao.tipo === 'oferta' ? `R$ ${Number(promocao.valor).toFixed(2)}` : 'Novidade'}</b>
+                    <article className={`banner-oferta ${promocao.img ? '' : 'banner-oferta-sem-imagem'}`} key={promocao.id}>
+                      {promocao.img ? <img src={promocao.img} alt="" className="banner-oferta-imagem" /> : <div className="banner-oferta-placeholder" aria-hidden="true">OFERTA</div>}
+                      <div className="banner-oferta-conteudo">
+                        <span className="banner-oferta-tipo">{promocao.tipo === 'anuncio' ? 'Novidade' : 'Oferta especial'}</span>
+                        <strong>{promocao.titulo}</strong>
+                        {promocao.descricao && <p>{promocao.descricao}</p>}
+                      </div>
+                      <b>{promocao.tipo === 'desconto' ? `${Number(promocao.valor).toFixed(0)}% OFF` : promocao.tipo === 'oferta' ? `R$ ${Number(promocao.valor).toFixed(2)}` : 'Confira'}</b>
                     </article>
                   ))}
                 </div>

@@ -5,6 +5,7 @@
     "dev": "cd ./e-cormeci && npm run dev -- --host",
     "build": "cd ./e-cormeci && npm run build",
     "preview": "cd ./e-cormeci && npm run preview -- --host",
+    "start": "node server.js",
     "server": "node server.js"
   },
   "dependencies": {

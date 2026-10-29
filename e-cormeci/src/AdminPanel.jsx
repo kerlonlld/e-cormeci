@@ -206,11 +206,11 @@ export function AdminPanel({ onVoltar }) {
             <option value="desconto">Desconto (%)</option><option value="oferta">Oferta (valor)</option><option value="anuncio">Anúncio</option>
           </select>
           <input type="number" min="0" step="0.01" placeholder="Valor" value={promocao.valor} onChange={(e) => setPromocao({ ...promocao, valor: e.target.value })} />
-          <input type="url" placeholder="URL da imagem (opcional)" value={promocao.imagem} onChange={(e) => setPromocao({ ...promocao, imagem: e.target.value })} />
+          <input type="url" placeholder="Cole aqui a URL da foto do banner" value={promocao.imagem} onChange={(e) => setPromocao({ ...promocao, imagem: e.target.value })} />
           <button className="botao-confirmar" type="submit">Publicar</button>
         </form>
         <div className="lista-promocoes-admin">
-          {promocoes.map((item) => <div className="linha-pagamento" key={item.id}><div><strong>{item.titulo}</strong><span>{item.tipo} · {item.descricao}</span></div><button className="botao-perigo" onClick={() => removerPromocao(item.id)}>Remover</button></div>)}
+          {promocoes.map((item) => <div className="linha-pagamento" key={item.id}>{item.img && <img className="miniatura-promocao-admin" src={item.img} alt="" />}<div><strong>{item.titulo}</strong><span>{item.tipo} · {item.descricao}</span></div><button className="botao-perigo" onClick={() => removerPromocao(item.id)}>Remover</button></div>)}
         </div>
       </section>
       <section className="painel-grid">

@@ -240,15 +240,20 @@ body {
 .texto-vazio { color: #64748b; }
 .secao-ofertas { margin: 0 0 18px; padding: 16px; border: 1px solid #fde68a; border-radius: 12px; background: #fffbeb; }
 .ofertas-cabecalho h2 { margin: 3px 0 12px; color: #78350f; }
-.grade-ofertas { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
-.card-oferta { display: grid; grid-template-columns: 58px 1fr auto; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; background: #fff; }
-.card-oferta img { width: 58px; height: 58px; object-fit: cover; border-radius: 8px; }
-.card-oferta p { margin: 3px 0 0; color: #64748b; font-size: .86rem; }
-.card-oferta b { color: #b45309; white-space: nowrap; }
+.grade-ofertas { display: grid; gap: 12px; }
+.banner-oferta { display: grid; grid-template-columns: minmax(180px, 32%) minmax(0, 1fr) auto; align-items: stretch; min-height: 150px; overflow: hidden; border-radius: 12px; background: #fff; box-shadow: 0 3px 10px rgba(120, 53, 15, 0.1); }
+.banner-oferta-imagem, .banner-oferta-placeholder { width: 100%; height: 100%; min-height: 150px; object-fit: cover; }
+.banner-oferta-placeholder { display: grid; place-items: center; background: linear-gradient(135deg, #f59e0b, #b45309); color: #fff; font-size: 1.4rem; font-weight: 800; letter-spacing: .08em; }
+.banner-oferta-conteudo { display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 18px 20px; }
+.banner-oferta-conteudo strong { color: #422006; font-size: 1.25rem; }
+.banner-oferta-tipo { color: #b45309; font-size: .74rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.banner-oferta-conteudo p { margin: 0; color: #64748b; font-size: .92rem; line-height: 1.4; }
+.banner-oferta b { align-self: center; margin: 0 18px 0 0; color: #b45309; font-size: 1rem; white-space: nowrap; }
 .promocoes-admin { max-width: 1100px; margin: 0 auto 20px; }
 .form-promocao { display: grid; grid-template-columns: repeat(5, minmax(120px, 1fr)) auto; gap: 8px; }
 .form-promocao input, .form-promocao select { min-width: 0; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; }
 .lista-promocoes-admin { margin-top: 12px; }
+.miniatura-promocao-admin { width: 56px; height: 42px; object-fit: cover; border-radius: 6px; }
 
 .login-cliente { display: grid; place-items: center; }
 .login-cliente h1 { margin: 0; color: #0f172a; font-size: 2rem; }
@@ -1175,6 +1180,25 @@ input:not([type='file']):-webkit-autofill:focus {
 }
 
 @media (max-width: 640px) {
+  .banner-oferta {
+    grid-template-columns: 1fr;
+  }
+
+  .banner-oferta-imagem,
+  .banner-oferta-placeholder {
+    height: 150px;
+    min-height: 150px;
+  }
+
+  .banner-oferta-conteudo {
+    padding: 14px 16px 8px;
+  }
+
+  .banner-oferta b {
+    justify-self: start;
+    margin: 0 16px 14px;
+  }
+
   .cabecalho {
     align-items: flex-start;
     flex-wrap: wrap;
