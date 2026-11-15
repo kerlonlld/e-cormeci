@@ -22,6 +22,11 @@ const products = [
   { id: 8, name: "Chocolate 70% cacau", meta: "Doces · 100g", price: 11.9, image: "https://images.unsplash.com/photo-1548907040-4d42fcaa2c93?auto=format&fit=crop&w=700&q=85" }
 ];
 
+const categories = [
+  ["Todos", "🛒"], ["Hortifruti", "🥬"], ["Padaria", "🥖"], ["Bebidas", "🥤"],
+  ["Laticínios", "🧀"], ["Mercearia", "🛍️"], ["Frios", "🥚"], ["Doces", "🍫"],
+];
+
 const money = (value) => value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const viewPaths = {
   shop: "/", cart: "/carrinho", checkout: "/finalizar-compra",
@@ -47,12 +52,17 @@ function ProductCard({ product, onAdd }) {
 
 function Shop({ cart, onAdd, onToast, search, user, onViewCart }) {
   const [filter, setFilter] = useState(search);
+  const [selectedCategory, setSelectedCategory] = useState("Todos");
   useEffect(() => setFilter(search), [search]);
-  const filtered = products.filter((p) => p.name.toLowerCase().includes(filter.toLowerCase()));
+  const filtered = products.filter((product) => {
+    const matchesSearch = `${product.name} ${product.meta}`.toLowerCase().includes(filter.trim().toLowerCase());
+    const matchesCategory = selectedCategory === "Todos" || product.meta.split("·")[0].trim() === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
   return <><div className="page-heading"><div><p>Mercado Express</p><h1>{user?.displayName ? `Olá, ${user.displayName.split(" ")[0]}` : "Bem-vindo(a)"} 👋</h1><p>Encontre tudo o que precisa, sem sair de casa.</p></div><button className="orange-button" onClick={onViewCart}>🛒 Carrinho ({cart.length})</button></div>
-    <section className="hero"><div><span className="eyebrow" style={{ margin: 0, color: "var(--orange)" }}>OFERTA DA SEMANA</span><h2>Mais sabor, menos<br />preço na sua mesa.</h2><p>Produtos selecionados com até 30% de desconto.</p><button className="orange-button" onClick={() => setFilter("café")}>Ver ofertas <b>→</b></button></div><div className="hero-art"><img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=700&q=85" alt="Produtos frescos no mercado" /></div></section>
-    <div className="section-title"><h2>Compre por categoria</h2><a className="text-link">Ver todas →</a></div><div className="categories"><button className="category active"><span>🛒</span>Todos</button><button className="category"><span>🥬</span>Hortifruti</button><button className="category"><span>🥖</span>Padaria</button><button className="category"><span>🥤</span>Bebidas</button><button className="category"><span>🧀</span>Laticínios</button></div>
-    <div className="section-title"><h2>{filter ? "Resultados da busca" : "Mais pedidos da semana"}</h2><a className="text-link">Ver catálogo completo →</a></div><div className="product-grid">{filtered.length ? filtered.map((p) => <ProductCard key={p.id} product={p} onAdd={onAdd} />) : <div className="empty" style={{ gridColumn: "1/-1" }}>Nenhum produto encontrado.</div>}</div>
+    <section className="hero"><div><span className="eyebrow" style={{ margin: 0, color: "var(--orange)" }}>OFERTA DA SEMANA</span><h2>Mais sabor, menos<br />preço na sua mesa.</h2><p>Produtos selecionados com até 30% de desconto.</p><button className="orange-button" onClick={() => { setSelectedCategory("Todos"); setFilter("café"); }}>Ver ofertas <b>→</b></button></div><div className="hero-art"><img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=700&q=85" alt="Produtos frescos no mercado" /></div></section>
+    <div className="section-title"><h2>Compre por categoria</h2></div><div className="categories">{categories.map(([category, icon]) => <button key={category} className={`category ${selectedCategory === category ? "active" : ""}`} aria-pressed={selectedCategory === category} onClick={() => setSelectedCategory(category)}><span>{icon}</span>{category}</button>)}</div>
+    <div className="section-title"><h2>{filter ? "Resultados da busca" : selectedCategory === "Todos" ? "Mais pedidos da semana" : selectedCategory}</h2></div><div className="product-grid">{filtered.length ? filtered.map((product) => <ProductCard key={product.id} product={product} onAdd={onAdd} />) : <div className="empty" style={{ gridColumn: "1/-1" }}>Nenhum produto encontrado{selectedCategory !== "Todos" ? ` em ${selectedCategory}` : ""}.</div>}</div>
   </>;
 }
 
