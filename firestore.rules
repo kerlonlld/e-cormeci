@@ -1,0 +1,100 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function userRole(role) {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+    }
+    function admin() { return userRole('admin'); }
+    function assignedDelivery() {
+      return userRole('integrator') &&
+        resource.data.assignedTo == request.auth.uid &&
+        resource.data.status in ['ready_for_delivery', 'delivering'];
+    }
+
+    match /users/{uid} {
+      allow read: if admin();
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create: if admin() || (
+        signedIn() &&
+        request.auth.uid == uid &&
+        request.resource.data.role == 'client' &&
+        request.resource.data.keys().hasOnly(['role', 'displayName', 'email']) &&
+        request.resource.data.keys().hasAll(['role'])
+      );
+      allow update: if admin() || (
+        signedIn() &&
+        request.auth.uid == uid &&
+        request.resource.data.role == resource.data.role &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['displayName', 'email', 'photoURL', 'updatedAt'])
+      );
+      allow delete: if admin();
+    }
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if admin();
+    }
+    match /storeConfig/{configId} {
+      allow read: if true;
+      allow write: if admin();
+    }
+    match /orders/{orderId} {
+      allow create: if userRole('client') &&
+        request.resource.data.clientId == request.auth.uid &&
+        request.resource.data.status == 'pending' &&
+        request.resource.data.keys().hasOnly([
+          'clientId', 'clientName', 'clientEmail', 'clientPhone', 'items',
+          'addressDetails', 'deliveryAddress', 'paymentMethod', 'subtotal',
+          'shippingFee', 'total', 'status', 'createdAt'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'clientId', 'clientName', 'clientEmail', 'clientPhone', 'items',
+          'addressDetails', 'deliveryAddress', 'paymentMethod', 'subtotal',
+          'shippingFee', 'total', 'status', 'createdAt'
+        ]) &&
+        request.resource.data.items is list &&
+        request.resource.data.clientName is string &&
+        request.resource.data.clientEmail is string &&
+        request.resource.data.clientPhone is string &&
+        request.resource.data.addressDetails is map &&
+        request.resource.data.deliveryAddress is string &&
+        request.resource.data.paymentMethod in ['cash', 'pix', 'card'] &&
+        request.resource.data.subtotal is number &&
+        request.resource.data.shippingFee is number &&
+        request.resource.data.total == request.resource.data.subtotal + request.resource.data.shippingFee &&
+        request.resource.data.createdAt == request.time &&
+        getAfter(/databases/$(database)/documents/deliveryCodes/$(orderId)).data.clientId == request.auth.uid;
+      allow read: if admin() || (
+        userRole('client') && resource.data.clientId == request.auth.uid
+      ) || assignedDelivery();
+      allow update: if admin() || (
+        assignedDelivery() &&
+        request.resource.data.clientId == resource.data.clientId &&
+        request.resource.data.assignedTo == resource.data.assignedTo &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'updatedAt', 'completedAt', 'deliveryCodeValidated']) &&
+        request.resource.data.updatedAt == request.time &&
+        (
+          (resource.data.status == 'ready_for_delivery' &&
+            request.resource.data.status == 'delivering') ||
+          (resource.data.status == 'delivering' &&
+            request.resource.data.status == 'completed' &&
+            request.resource.data.deliveryCodeValidated ==
+              get(/databases/$(database)/documents/deliveryCodes/$(orderId)).data.code)
+        )
+      );
+    }
+    match /deliveryCodes/{orderId} {
+      allow create: if userRole('client') &&
+        request.resource.data.keys().hasOnly(['clientId', 'code']) &&
+        request.resource.data.keys().hasAll(['clientId', 'code']) &&
+        request.resource.data.clientId == request.auth.uid &&
+        request.resource.data.code.matches('^[0-9]{4}$') &&
+        getAfter(/databases/$(database)/documents/orders/$(orderId)).data.clientId == request.auth.uid;
+      allow read: if signedIn() && resource.data.clientId == request.auth.uid;
+    }
+  }
+}
